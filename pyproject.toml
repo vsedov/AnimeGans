@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "fyp"
+version = "0.1.0"
+description = "Final Year Project"
+authors = ["vsedov <viv.sedov@hotmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+icecream = "^2.1.3"
+loguru = "^0.6.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^5.0.4"
+yapf = "^0.32.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
