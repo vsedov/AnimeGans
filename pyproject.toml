@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "Final Year Project"
 authors = ["vsedov <viv.sedov@hotmail.com>"]
 license = "MIT"
+classifiers = ["Topic :: Utilities"]
+packages = [ {include = "src"}]
+
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
@@ -30,10 +33,12 @@ loguru = "^0.6.0"
 sklearn = "^0.0"
 torchsummary = "^1.5.1"
 ruff = {git = "https://github.com/charliermarsh/ruff", rev = "main"}
+scikit-image = "^0.19.3"
+attrs = "^22.1.0"
 
 
 [tool.poetry.dev-dependencies]
-# python-dotenv = "^"
+python-dotenv = "^"
 isort = "^5.10.1"
 coverage = "^6.3.2"
 debugpy = "^1.6.0"
@@ -54,9 +59,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.taskipy.tasks]
-start = "python -m fyp"
+start = "python -m src"
 build = "poetry build"
-# formating - linting
 lint = "pre-commit run --all-files"
 isort = "isort ."
 
@@ -142,7 +146,7 @@ color = true
 [tool.coverage.run]
 parallel = true
 branch = true
-source_pkgs = ["playground"]
+source_pkgs = ["src"]
 source = ["tests"]
 omit = ["**/__main__.py"]
 
