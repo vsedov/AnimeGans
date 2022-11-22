@@ -1,0 +1,17 @@
+@document.meta
+title: readme
+description: 
+authors: viv
+categories: 
+version: 0.0.17
+@end
+
+
+* Reason
+  - Due to the large amount of image processing that will be required for this, i found that having a simple example of how images work 
+  would provide fruit full results. 
+
+  - This development will be for me to test image proc and other means for me to improve my current development
+    workflow
+
+
