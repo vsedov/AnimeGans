@@ -1,0 +1,15 @@
+@document.meta
+title: 15_10_22
+description: 
+authors: viv
+categories: 
+version: 0.0.17
+@end
+
+
+* Completed
+  - [x] finished training my initial data: 
+  - [x] Compared if it was viable, sadly it was not the case it seems i need more gpu power
+  - [x] Started looking at more papers about gans to figure out how i can improve the training process
+  - [x] Started fetching the animé wiafu dataset
+

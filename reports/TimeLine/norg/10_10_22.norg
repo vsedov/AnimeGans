@@ -1,0 +1,13 @@
+@document.meta
+title: 10_10_22
+description: 
+authors: viv
+categories: 
+version: 0.0.17
+@end
+
+* Completed
+  - [x] Started first draft paper [ Not sure if its viable]
+  - [x] Started First view on how gans works
+  - [x] Progressing : It takes for ever for these things to train , but ive started a simple code base for gans
+  - [x] Got results for how gans work
