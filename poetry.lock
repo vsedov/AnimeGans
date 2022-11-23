@@ -456,6 +456,23 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "kaggle"
+version = "1.5.12"
+description = "Kaggle API"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+certifi = "*"
+python-dateutil = "*"
+python-slugify = "*"
+requests = "*"
+six = ">=1.10"
+tqdm = "*"
+urllib3 = "*"
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.4"
 description = "A fast implementation of the Cassowary constraint solver"
@@ -965,6 +982,20 @@ python-versions = ">=3.5"
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-slugify"
+version = "7.0.0"
+description = "A Python slugify application that also handles Unicode"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+text-unidecode = ">=1.3"
+
+[package.extras]
+unidecode = ["Unidecode (>=1.1.1)"]
+
+[[package]]
 name = "pytorchcv"
 version = "0.0.67"
 description = "Image classification and segmentation models for PyTorch"
@@ -1165,6 +1196,14 @@ psutil = ">=5.7.2,<6.0.0"
 toml = ">=0.10.0,<0.11.0"
 
 [[package]]
+name = "text-unidecode"
+version = "1.3"
+description = "The most basic Text::Unidecode port"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "tifffile"
 version = "2022.10.10"
 description = "Read and write TIFF files"
@@ -1344,7 +1383,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "ea2f1e43cbe5e52c2f9a096bde93c9f98fc39631b253e2e83147c3159aff713b"
+content-hash = "95c27178278486cee60cdf2c7c6efe7622e32fb5bbe0902e6e8821dc269e8e71"
 
 [metadata.files]
 appnope = []
@@ -1383,6 +1422,7 @@ ipython = []
 isort = []
 jedi = []
 jinja2 = []
+kaggle = []
 kiwisolver = []
 loguru = []
 markupsafe = []
@@ -1427,6 +1467,7 @@ pytest-forked = []
 pytest-xdist = []
 python-dateutil = []
 python-dotenv = []
+python-slugify = []
 pytorchcv = []
 pytz = []
 pywavelets = []
@@ -1442,6 +1483,7 @@ sklearn = []
 stack-data = []
 sympy = []
 taskipy = []
+text-unidecode = []
 tifffile = []
 tk = []
 toml = []
