@@ -23,6 +23,7 @@ def constants():
         "KAGGLE_KEY": os.getenv("KAGGLE_KEY"),
         "DIR": f"{root()}/src/",
         "show_data": True,
+        "initial": {"gan": (valid := (True)), "conv": not valid},
     }
 
 

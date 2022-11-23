@@ -3,16 +3,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import convolve2d
-from scipy.sparse import identity
 from skimage.color import rgb2gray
 from skimage.io import imread
 from skimage.transform import rescale
-
-path = f"{os.path.dirname(__file__)}/dog.jpg"
-my_dog = imread(path)
-scaled_dog = np.stack([rescale(my_dog[:, :, i], 0.10) for i in range(3)], axis=2)
-my_dog_gray = rescale(rgb2gray(my_dog), 0.10)
-
 
 # Edge Detection -1
 kernel1 = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
@@ -55,37 +48,42 @@ kernel12 = -(1 / 256.0) * np.array(
 )
 
 
-def rgb_convolve2d(image, kernel):
-    red = convolve2d(image[:, :, 0], kernel, "valid")
-    green = convolve2d(image[:, :, 1], kernel, "valid")
-    blue = convolve2d(image[:, :, 2], kernel, "valid")
-    return np.stack([red, green, blue], axis=2)
+def setup():
+    path = f"{os.path.dirname(__file__)}/dog.jpg"
+    my_dog = imread(path)
+    scaled_dog = np.stack([rescale(my_dog[:, :, i], 0.10) for i in range(3)], axis=2)
+    my_dog_gray = rescale(rgb2gray(my_dog), 0.10)
 
+    def rgb_convolve2d(image, kernel):
+        red = convolve2d(image[:, :, 0], kernel, "valid")
+        green = convolve2d(image[:, :, 1], kernel, "valid")
+        blue = convolve2d(image[:, :, 2], kernel, "valid")
+        return np.stack([red, green, blue], axis=2)
 
-identity = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
+    identity = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
 
-conv_im1 = rgb_convolve2d(scaled_dog, identity)
-fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-ax[0].imshow(identity, cmap="gray")
-ax[1].imshow(abs(conv_im1), cmap="gray")
+    conv_im1 = rgb_convolve2d(scaled_dog, identity)
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+    ax[0].imshow(identity, cmap="gray")
+    ax[1].imshow(abs(conv_im1), cmap="gray")
 
-plt.show()
-kernels = [kernel1, kernel2, kernel3, kernel4, kernel5, kernel6]
-kernel_name = ["Edge Detection#1", "Edge Detection#2", "Bottom Sobel", "Top Sobel", "Left Sobel", "Right Sobel"]
-figure, axis = plt.subplots(2, 3, figsize=(12, 10))
+    plt.show()
+    kernels = [kernel1, kernel2, kernel3, kernel4, kernel5, kernel6]
+    kernel_name = ["Edge Detection#1", "Edge Detection#2", "Bottom Sobel", "Top Sobel", "Left Sobel", "Right Sobel"]
+    figure, axis = plt.subplots(2, 3, figsize=(12, 10))
 
-for kernel, name, ax in zip(kernels, kernel_name, axis.flatten()):
-    conv_im1 = convolve2d(my_dog_gray, kernel[::-1, ::-1]).clip(0, 1)
-    ax.imshow(abs(conv_im1), cmap="gray")
-    ax.set_title(name)
+    for kernel, name, ax in zip(kernels, kernel_name, axis.flatten()):
+        conv_im1 = convolve2d(my_dog_gray, kernel[::-1, ::-1]).clip(0, 1)
+        ax.imshow(abs(conv_im1), cmap="gray")
+        ax.set_title(name)
 
-kernels = [kernel7, kernel8, kernel9, kernel10, kernel11, kernel12]
-kernel_name = ["Sharpen", "Emboss", "Box Blur", "3x3 Gaussian Blur", "5x5 Gaussian Blur", "5x5 Unsharp Masking"]
-figure, axis = plt.subplots(2, 3, figsize=(12, 10))
+    kernels = [kernel7, kernel8, kernel9, kernel10, kernel11, kernel12]
+    kernel_name = ["Sharpen", "Emboss", "Box Blur", "3x3 Gaussian Blur", "5x5 Gaussian Blur", "5x5 Unsharp Masking"]
+    figure, axis = plt.subplots(2, 3, figsize=(12, 10))
 
-for kernel, name, ax in zip(kernels, kernel_name, axis.flatten()):
-    conv_im1 = rgb_convolve2d(scaled_dog, kernel[::-1, ::-1]).clip(0, 1)
-    ax.imshow(abs(conv_im1), cmap="gray")
-    ax.set_title(name)
+    for kernel, name, ax in zip(kernels, kernel_name, axis.flatten()):
+        conv_im1 = rgb_convolve2d(scaled_dog, kernel[::-1, ::-1]).clip(0, 1)
+        ax.imshow(abs(conv_im1), cmap="gray")
+        ax.set_title(name)
 
-plt.show()
+    plt.show()
