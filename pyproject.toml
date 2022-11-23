@@ -35,6 +35,7 @@ torchsummary = "^1.5.1"
 ruff = {git = "https://github.com/charliermarsh/ruff", rev = "main"}
 scikit-image = "^0.19.3"
 attrs = "^22.1.0"
+kaggle = "^1.5.12"
 
 
 [tool.poetry.dev-dependencies]
