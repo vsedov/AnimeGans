@@ -1,69 +1,42 @@
 import os
 import zipfile
 
-from heart.core import hc
-from heart.log import get_logger
-
-log = get_logger(__name__)
-
-zip_path = f"{hc.DIR}/data/zip/"
-command = f"kaggle datasets download -d name/path -p {zip_path}"
+# Change this later
+# from src.core import hc
+# zip_path = f"{hc.DIR}/data/zip/"
+# command = f"kaggle datasets download -d name/path -p {zip_path}"
 
 
-def check_folder(folder):
-    """Check folder
+class DSDownloader:
+    def __init__(self, command, zip_path, unzip_dir, zip_name):
+        self.command = command
+        self.zip_location = zip_path
+        self.unzip_dir = unzip_dir
+        self.zip_name = zip_name
 
-    Parameters
-    ----------
-    folder : Directory path to a folder
+    def download_dir(self):
+        if self.check_folder(self.unzip_dir):
+            return
+        self.check_zip()
 
-    Returns
-    -------
-    BOolean
-        True if it is a folder and that the folder contains some item
-    """
-    return True if os.path.isdir(folder) and os.listdir(folder) else False
+        with zipfile.ZipFile(f"{self.zip_location}/{self.zip_name}", "r") as zip_ref:
+            zip_ref.extractall(self.unzip_dir)
 
+    def check_current_path_file(self, filename):
+        return True if str(os.path.exists(filename)) else False
 
-def check_current_path_file(filename):
-    """Check current path file
+    def check_zip(self):
+        if self.check_current_path_file(f"{self.zip_location}/{self.zip_name}"):
+            os.system(self.command)
 
-    Parameters
-    ----------
-    filename : File name / needs full path - use constants for this
-        Full path to x.py file
+    def check_folder(self, folder):
+        return True if os.path.isdir(folder) and os.listdir(folder) else False
 
-    Returns
-    -------
-    Booelan
-        True if the file exists else False
-    """
-    return True if str(os.path.exists(filename)) else False
+    def force_replace_zip(self):
+        if self.check_folder():
+            for files in os.listdir(self.zip_location):
+                os.remove(files)
+        self.check_zip()
 
-
-def check_zip():
-    """Check if zip file exists and if not, download it using main kggle command"""
-    if check_current_path_file(f"{zip_path}anime.zip"):
-        log.info("Downloading zip file")
-        os.system(command)
-
-
-def force_replace_zip():
-    """Force replace zip for what ever reason"""
-    if check_folder(zip_path):
-        for files in os.listdir(zip_path):
-            os.remove(files)
-    check_zip()
-
-
-def download_dir():
-    """
-    Download Zip and Daataset
-    """
-    if check_folder(f"{hc.DIR}/data/anime"):
-        return ...
-
-    check_zip()
-
-    with zipfile.ZipFile(f"{zip_path}anime.zip", "r") as zip_ref:
-        zip_ref.extractall(f"{hc.DIR}/data/anime")
+    def __call__(self):
+        self.download_dir()
