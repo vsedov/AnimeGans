@@ -23,7 +23,11 @@ def constants():
         "KAGGLE_KEY": os.getenv("KAGGLE_KEY"),
         "DIR": f"{root()}/src/",
         "show_data": True,
-        "initial": {"gan": (valid := (True)), "conv": not valid},
+        "initial": {
+            "gan": (valid := (True)),
+            "conv": not valid,
+            "params": {"latent_vector": 100, "generator": 64, "discriminator": 64, "output": 3},
+        },
     }
 
 
