@@ -146,7 +146,7 @@ python-versions = ">=3.6"
 name = "debugpy"
 version = "1.6.3"
 description = "An implementation of the Debug Adapter Protocol for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -170,7 +170,7 @@ python-versions = "*"
 name = "exceptiongroup"
 version = "1.0.4"
 description = "Backport of PEP 654 (exception groups)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -372,7 +372,7 @@ tifffile = ["tifffile"]
 name = "iniconfig"
 version = "1.1.1"
 description = "iniconfig: brain-dead simple config-ini parsing"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -739,7 +739,7 @@ test = ["appdirs (==1.4.4)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest
 name = "pluggy"
 version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -898,7 +898,7 @@ python-versions = "*"
 name = "pytest"
 version = "7.2.0"
 description = "pytest: simple powerful testing with Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -1069,7 +1069,7 @@ jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
 
 [[package]]
 name = "ruff"
-version = "0.0.134"
+version = "0.0.137"
 description = "An extremely fast Python linter, written in Rust."
 category = "main"
 optional = false
@@ -1080,7 +1080,7 @@ develop = false
 type = "git"
 url = "https://github.com/charliermarsh/ruff"
 reference = "main"
-resolved_reference = "814ddeb7ea3041c25a1c16cea0a007c9f7e42f5a"
+resolved_reference = "33fbef7700e27260b9037daf4164e9b7352eb39f"
 
 [[package]]
 name = "scikit-image"
@@ -1383,7 +1383,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "95c27178278486cee60cdf2c7c6efe7622e32fb5bbe0902e6e8821dc269e8e71"
+content-hash = "baad1aa3981af2dcdec495b9e8d306379b0014f39cf6b66598cde051e3e3a007"
 
 [metadata.files]
 appnope = []
