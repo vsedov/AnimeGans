@@ -5,6 +5,7 @@ class HC:
         ...
 
 
+"""Helper constants"""
 hc = HC()
 
 
@@ -41,6 +42,7 @@ class HelperFunctions:
         ...
 
 
+"""Helper Programs/Functions"""
 hp = HelperFunctions()
 
 
