@@ -36,6 +36,8 @@ ruff = {git = "https://github.com/charliermarsh/ruff", rev = "main"}
 scikit-image = "^0.19.3"
 attrs = "^22.1.0"
 kaggle = "^1.5.12"
+pytest = "^7.2.0"
+debugpy = "^1.6.3"
 
 
 [tool.poetry.dev-dependencies]
