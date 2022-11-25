@@ -7,8 +7,10 @@ __pycache__/
 *.ruff_cache/
 # C extensions
 *.so
-*.png
-*.jpg
+test1/
+train/
+types/
+
 
 # Distribution / packaging
 .Python
