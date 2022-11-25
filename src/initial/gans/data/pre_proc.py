@@ -39,7 +39,9 @@ class Data(data.Dataset):
                 ]
             ),
         )
-        self.dataloader = torch.utils.data.DataLoader(self.dataset, batch_size=64, shuffle=True)
+
+    def get_dl(self, batch_size=32, shuffle=True, drop_last=True):
+        return torch.utils.data.DataLoader(self.dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last)
 
     def view_training_data(self):
         """
