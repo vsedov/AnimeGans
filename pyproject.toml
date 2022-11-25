@@ -38,6 +38,8 @@ attrs = "^22.1.0"
 kaggle = "^1.5.12"
 pytest = "^7.2.0"
 debugpy = "^1.6.3"
+wandb = "^0.13.5"
+plotly = "^5.11.0"
 
 
 [tool.poetry.dev-dependencies]
