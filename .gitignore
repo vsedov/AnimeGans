@@ -11,7 +11,8 @@ test1/
 train/
 types/
 wandb/
-human_faces/
+img_align_celeba/
+checkpoints/
 
 
 # Distribution / packaging
