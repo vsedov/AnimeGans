@@ -11,6 +11,7 @@ test1/
 train/
 types/
 wandb/
+human_faces/
 
 
 # Distribution / packaging
