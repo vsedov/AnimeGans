@@ -26,7 +26,15 @@ def constants():
         "initial": {
             "gan": (valid := (True)),
             "conv": not valid,
-            "params": {"latent_vector": 100, "generator": 64, "discriminator": 64, "output": 3},
+            "params": {
+                "latent_vector": 100,
+                "image_size": 64,
+                "noise_vector": 128,  #  REVISIT: (vsedov) (04:27:45 - 26/11/22): Need to double check if this is required or not
+                "output": 3,
+                "epoch_amount": [2, 4, 30, 100, 300, 500, 1000][-1],  # Train on 1k epochs overnight
+                "batch_size": [32, 64, 128, 256, 512, 1024][-3],  # Generalisation issue, but lets see
+                "learning_rate": [0.0001, 0.0005, 0.001, 0.00146][0],
+            },
         },
     }
 
