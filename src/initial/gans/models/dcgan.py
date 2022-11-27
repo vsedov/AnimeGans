@@ -78,7 +78,7 @@ def show_info():
 
     params = hc.initial["params"]
 
-    gen = Generator(params["latent_vector"], params["generator"], params["output"])
+    gen = Generator(params["latent_vector"], params["image_size"], params["output"])
     dis = Discriminator(params["discriminator"], params["output"])
 
     hp.sum(gen)
