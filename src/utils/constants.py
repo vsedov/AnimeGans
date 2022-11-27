@@ -17,6 +17,13 @@ def root():
 
 
 def constants():
+    """Constants:
+
+    Return a dictionary that will get parsed into
+    src.core.HC
+    Once parsed on __init__.py : you will have access to global modifiers
+    through out the entire process.
+    """
     return {
         "DEFAULT_DEVICE": "cuda" if torch.cuda.is_available() else "cpu",
         "KAGGLE_USERNAME": os.getenv("KAGGLE_USERNAME"),
@@ -27,13 +34,14 @@ def constants():
             "gan": (valid := (True)),
             "conv": not valid,
             "params": {
-                "latent_vector": 100,
+                "latent_vector": 100,  # 100 | 128 | 256
                 "image_size": 64,
-                "noise_vector": 128,  #  REVISIT: (vsedov) (04:27:45 - 26/11/22): Need to double check if this is required or not
+                "noise_vector": 64,  # This is the amount of noise vectors we want Wise to keep this the same as the image size
                 "output": 3,
-                "epoch_amount": [2, 4, 30, 100, 300, 500, 1000][-1],  # Train on 1k epochs overnight
-                "batch_size": [32, 64, 128, 256, 512, 1024][-3],  # Generalisation issue, but lets see
-                "learning_rate": [0.0001, 0.0005, 0.001, 0.00146][0],
+                "epoch_amount": [2, 4, 10, 15, 30, 100, 300, 500, 1000][-1],  # Train on 1k epochs overnight
+                "batch_size": [32, 64, 128, 256, 512, 1024][-2],
+                "lr": [0.0001, 0.0005, 0.001, 0.00146][0],
+                "ds_type": "human",  # Human , cat, dog : Human ds May require extra data
             },
         },
     }
