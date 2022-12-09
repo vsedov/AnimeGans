@@ -29,9 +29,13 @@ def constants():
         "KAGGLE_USERNAME": os.getenv("KAGGLE_USERNAME"),
         "KAGGLE_KEY": os.getenv("KAGGLE_KEY"),
         "DIR": f"{root()}/src/",
-        "show_data": True,
+        "show_data": True,  # this is for initial, and is a param to show data in a mp4 file
         "initial": {
-            "gan": (valid := (True)),
+            "train": (run_test := (False)),  # if True, we will not test the model
+            "test": not run_test,
+            "gan": (valid := (True)),  # If this is True, then Conv will run the program to show how conv works
+            # Once again this is more for training, and to understand certain principles. and not for the core project
+            # the initial folder is based for the first part of the project, purely to understand things.
             "conv": not valid,
             "params": {
                 "latent_vector": 100,  # 100 | 128 | 256

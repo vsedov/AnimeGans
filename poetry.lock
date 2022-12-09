@@ -1149,7 +1149,7 @@ jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
 
 [[package]]
 name = "ruff"
-version = "0.0.165"
+version = "0.0.171"
 description = "An extremely fast Python linter, written in Rust."
 category = "main"
 optional = false
@@ -1160,7 +1160,7 @@ develop = false
 type = "git"
 url = "https://github.com/charliermarsh/ruff"
 reference = "main"
-resolved_reference = "f1d3e3698ac45c6b8d92b5c7c5ae5993cce045f2"
+resolved_reference = "dfd6225d8542a6b2839807aeee211ce285cf84a0"
 
 [[package]]
 name = "scikit-image"
@@ -1426,6 +1426,30 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "torchmetrics"
+version = "0.11.0"
+description = "PyTorch native Metrics"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = ">=1.17.2"
+packaging = "*"
+torch = ">=1.8.1"
+
+[package.extras]
+all = ["lpips", "nltk (>=3.6)", "pycocotools", "pystoi", "pytorch-lightning (>=1.5)", "regex (>=2021.9.24)", "scipy", "torch-fidelity", "torchvision", "torchvision (>=0.8)", "tqdm (>=4.41.0)", "transformers (>=4.10.0)"]
+audio = ["pystoi"]
+detection = ["pycocotools", "torchvision (>=0.8)"]
+docs = ["docutils (>=0.16)", "myst-parser", "nbsphinx (>=0.8)", "pandoc (>=1.0)", "sphinx (>=4.0,<5.0)", "sphinx-autodoc-typehints (>=1.0)", "sphinx-copybutton (>=0.3)", "sphinx-paramlinks (>=0.5.1)", "sphinx-togglebutton (>=0.2)", "sphinxcontrib-fulltoc (>=1.0)", "sphinxcontrib-mockautodoc"]
+image = ["lpips", "scipy", "torch-fidelity", "torchvision"]
+integrate = ["pytorch-lightning (>=1.5)"]
+multimodal = ["transformers (>=4.10.0)"]
+test = ["bert-score (==0.3.10)", "check-manifest", "cloudpickle (>=1.3)", "coverage (>5.2)", "dython", "fast-bss-eval (>=0.1.0)", "fire", "huggingface-hub (<0.7)", "jiwer (>=2.3.0)", "kornia (>=0.6.7)", "mir-eval (>=0.6)", "mypy (==0.982)", "netcal", "pandas", "phmdoctest (>=1.1.1)", "pre-commit (>=1.0)", "psutil", "pycocotools", "pypesq (>1.2)", "pytest (>=6.0.0,<7.0.0)", "pytest-cov (>2.10)", "pytest-doctestplus (>=0.9.0)", "pytest-rerunfailures (>=10.0)", "pytest-timeout", "pytorch-msssim (==0.2.1)", "requests", "rouge-score (>=0.0.4)", "sacrebleu (>=2.0.0)", "scikit-image (>0.17.1)", "scikit-learn (>1.0,<1.1.1)", "scipy", "torch-complex", "transformers (>4.4.0)", "types-PyYAML", "types-emoji", "types-protobuf", "types-requests", "types-setuptools", "types-six", "types-tabulate"]
+text = ["nltk (>=3.6)", "regex (>=2021.9.24)", "tqdm (>=4.41.0)"]
+
+[[package]]
 name = "torchsummary"
 version = "1.5.1"
 description = "Model summary in PyTorch similar to `model.summary()` in Keras"
@@ -1583,7 +1607,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "4e0e96691cc19d987b008548eda8b782a6acad3473cc3aa6b0d1d66eec446903"
+content-hash = "07621798f444bea82b76902061861dc0d2dd92c94941afdcd19a12b8236dc727"
 
 [metadata.files]
 appnope = [
@@ -2692,6 +2716,10 @@ torch = [
 torchinfo = [
     {file = "torchinfo-1.7.1-py3-none-any.whl", hash = "sha256:792d429d87814aa9ddfb0f1b9d8c75861edc6099c5d753148064d3217128ff42"},
     {file = "torchinfo-1.7.1.tar.gz", hash = "sha256:7eb76ef0ca2d75aa7bf973451ba3693333ba97e197f8fa69d671b7f636384db4"},
+]
+torchmetrics = [
+    {file = "torchmetrics-0.11.0-py3-none-any.whl", hash = "sha256:f809c3cb86a0bd3d8743df0888040257e20d371a937ff9114f582a60ce1a1c67"},
+    {file = "torchmetrics-0.11.0.tar.gz", hash = "sha256:c838e0491d80775daadd0802e27ae3af112a52086c9ba8cbcd1e2807243c89ac"},
 ]
 torchsummary = [
     {file = "torchsummary-1.5.1-py3-none-any.whl", hash = "sha256:10f41d1743fb918f83293f13183f532ab1bb8f6639a1b89e5f8592ec1919a976"},

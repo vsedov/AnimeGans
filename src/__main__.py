@@ -1,12 +1,17 @@
 from src.core import hc
 
-#  TODO: (vsedov) : Refactor this
-if hc.initial["gan"]:
-    from src.initial.gans.runner import setup
+init = hc.initial
 
-    setup()
+#  TODO: (vsedov) (10:46:41 - 08/12/22): remove this crap code
+if init["train"]:
+    if init["gan"]:
+        from src.initial.gans.runner import setup
+        setup()
 
-if hc.initial["conv"]:
+elif init["test"]:
+    from src.initial.gans.test import setup
+    setup(check_point_amount=250, use_wandb=False, batch_size=64, dataload_amount=128)
+
+if init["conv"]:
     from src.initial.image_proc.kernel_understanding import setup
-
     setup()

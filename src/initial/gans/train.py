@@ -24,9 +24,7 @@ def learning_init_setup():
     torch.cuda.manual_seed(main_seed)
     """Use deterministic Convolutional Algorithms"""
     torch.backends.cudnn.deterministic = True
-    torch.use_deterministic_algorithms(
-        mode=True,
-    )
+    torch.use_deterministic_algorithms(mode=True,)
 
 
 def weights_init(m):
@@ -55,16 +53,15 @@ def create_checkpoint(
     if os.path.exists(f"{check_point_path}/{name_path}") is False:
         os.makedirs(f"{check_point_path}/{name_path}")
 
-    torch.save(
-        {
-            "epoch": epoch,
-            "dis_state_dict": dis.state_dict(),
-            "gen_state_dict": gen.state_dict(),
-            "optimizer_d_state_dict": optimizer_d.state_dict(),
-            "optimizer_g_state_dict": optimizer_g.state_dict(),
-        },
-        f"{check_point_path}/{name_path}/checkpoint_{epoch}.pth",
-    )
+    torch.save({
+        "epoch": epoch,
+        "dis_state_dict": dis.state_dict(),
+        "gen_state_dict": gen.state_dict(),
+        "optimizer_d_state_dict": optimizer_d.state_dict(),
+        "optimizer_g_state_dict": optimizer_g.state_dict(),
+    },
+               f"{check_point_path}/{name_path}/checkpoint_{epoch}.pth",
+              )
 
 
 def pickle_dumb(data, path, name):
@@ -107,7 +104,7 @@ def main():
         entity="vsedov",
         # fmt: off
         config={**params, **{
-            "test_mode":False ,
+            "test_mode": False ,
             "checkpoint_path": check_point_path,
             "ds_type": "human",
         }},  # cat | dog
@@ -138,16 +135,7 @@ def main():
 
     criterion = nn.BCELoss()  # Binary Cross Entropy Loss used for the discriminator
 
-    d_container = train(
-        dataloader,
-        dis,
-        gen,
-        criterion,
-        fixed_noise,
-        device,
-        config,
-        check_point_path,
-    )
+    d_container = train(dataloader, dis, gen, criterion, fixed_noise, device, config, check_point_path,)
 
     # Visualise the data
     visualise_training_losss(d_container)
@@ -157,18 +145,15 @@ def main():
     wandb.finish()
 
 
+
 # Might be a base line for my core stuf , im not sure
-def train(
-    dataloader,
-    dis,
-    gen,
-    criterion,
-    fixed_noise,
-    device,
-    config,
-    check_point_path,
-):
-    data_container = {"img_list": [], "g_loss": [], "d_loss": [], "iters": 0}
+def train(dataloader, dis, gen, criterion, fixed_noise, device, config, check_point_path,):
+    data_container = {
+        "img_list": [],
+        "g_loss": [],
+        "d_loss": [],
+        "iters": 0
+    }
     batch_size = config.batch_size
     epoch_amount = config.epoch_amount
     test_mode = config.test_mode
@@ -224,8 +209,7 @@ def train(
                 print(
                     f"Epoch [{epoch}/{epoch_amount}] Batch {i}/{len(dataloader)} "
                     f"Loss D: {error_d.item():.4f} Loss G: {error_g.item():.4f} "
-                    f"D(x): {derivative_d_real:.4f} D(G(z)): {derivative_d_fake:.4f} / {derivative_g:.4f} "
-                )
+                    f"D(x): {derivative_d_real:.4f} D(G(z)): {derivative_d_fake:.4f} / {derivative_g:.4f} ")
 
             data_container["g_loss"].append(error_g.item())
             data_container["d_loss"].append(error_d.item())
@@ -240,29 +224,26 @@ def train(
         elif (derivative_d_fake > derivative_d_real) and (derivative_d_fake > derivative_g):
             print("Generator is better")
 
-        wandb.log(
-            {
-                "Discriminator Loss": error_d.item(),
-                "Generator Loss": error_g.item(),
-                "Discriminator Real": derivative_d_real,
-                "Discriminator Fake": derivative_d_fake,
-                "Generator": derivative_g,
-                "Epoch": epoch,
-                "progress": epoch / epoch_amount,
-                "Better Model": "Discriminator"
-                if (derivative_d_real > derivative_d_fake) and (derivative_d_real > derivative_g)
-                else "Generator"
-                if (derivative_d_fake > derivative_d_real) and (derivative_d_fake > derivative_g)
-                else "None",
-            }
-        )
+        wandb.log({
+            "Discriminator Loss": error_d.item(),
+            "Generator Loss": error_g.item(),
+            "Discriminator Real": derivative_d_real,
+            "Discriminator Fake": derivative_d_fake,
+            "Generator": derivative_g,
+            "Epoch": epoch,
+            "progress": epoch / epoch_amount,
+            "Better Model":
+                "Discriminator" if
+                (derivative_d_real > derivative_d_fake) and (derivative_d_real > derivative_g) else "Generator" if
+                (derivative_d_fake > derivative_d_real) and (derivative_d_fake > derivative_g) else "None",
+        })
 
         with torch.no_grad():
             fake = gen(fixed_noise).detach().cpu()
 
         data_container["img_list"].append(vutils.make_grid(fake, padding=2, normalize=True))
 
-        if epoch % (epoch_amount / 4) == 0:
+        if epoch % (epoch_amount/4) == 0:
             print("Saving Images")
             wandb.log({"Generated Images": [wandb.Image(i) for i in data_container["img_list"]]})
             wandb.log({"Original Images": [wandb.Image(i) for i in X]})
@@ -281,6 +262,7 @@ def train(
     wandb.save(f"{check_point_path}/{name_space}_gen.pth")
 
     return data_container
+
 
 
 if __name__ == "__main__":
