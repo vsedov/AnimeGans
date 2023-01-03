@@ -1,10 +1,19 @@
 import os
 import zipfile
 
-# Change this later
-# from src.core import hc
-# zip_path = f"{hc.DIR}/data/zip/"
-# command = f"kaggle datasets download -d name/path -p {zip_path}"
+#  ╭────────────────────────────────────────────────────────────────────╮
+#  │ Change this later                                                  │
+#  │ from src.core import hc                                            │
+#  │ zip_path = f"{hc.DIR}/data/zip/"                                   │
+#  │ command = f"kaggle datasets download -d name/path -p {zip_path}"   │
+#  ╰────────────────────────────────────────────────────────────────────╯
+
+#  ╭────────────────────────────────────────────────────────────────────╮
+#  │ NOTE: (vsedov) (00:31:57 - 03/01/23): This is important :          │
+#  │  This will create the                                              │
+#  │ data path directly to data/ depending on the location that         │
+#  │  you wish to specify                                               │
+#  ╰────────────────────────────────────────────────────────────────────╯
 
 
 class DSDownloader:
@@ -30,7 +39,9 @@ class DSDownloader:
             return
         self.check_zip()
 
-        with zipfile.ZipFile(f"{self.zip_location}/{self.zip_name}", "r") as zip_ref:
+        with zipfile.ZipFile(
+            f"{self.zip_location}/{self.zip_name}", "r"
+        ) as zip_ref:
             zip_ref.extractall(self.unzip_dir)
 
     def check_current_path_file(self, filename):
