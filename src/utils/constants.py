@@ -30,24 +30,45 @@ def constants():
         "KAGGLE_KEY": os.getenv("KAGGLE_KEY"),
         "DIR": f"{root()}/src/",
         "show_data": True,  # this is for initial, and is a param to show data in a mp4 file
-        "initial": {
-            "train": (run_test := (False)),  # if True, we will not test the model
-            "test": not run_test,
-            "gan": (valid := (True)),  # If this is True, then Conv will run the program to show how conv works
-            # Once again this is more for training, and to understand certain principles. and not for the core project
-            # the initial folder is based for the first part of the project, purely to understand things.
-            "conv": not valid,
-            "params": {
-                "latent_vector": 100,  # 100 | 128 | 256
-                "image_size": 64,
-                "noise_vector": 64,  # This is the amount of noise vectors we want Wise to keep this the same as the image size
-                "output": 3,
-                "epoch_amount": [2, 4, 10, 15, 30, 100, 300, 500, 1000][-1],  # Train on 1k epochs overnight
-                "batch_size": [32, 64, 128, 256, 512, 1024][-2],
-                "lr": [0.0001, 0.0005, 0.001, 0.00146][0],
-                "ds_type": "human",  # Human , cat, dog : Human ds May require extra data
+        #  ╭────────────────────────────────────────────────────────────────────╮
+        #  │         Core Data that we will be using                            │
+        #  ╰────────────────────────────────────────────────────────────────────╯
+        "core": {
+            "batch_size": [64, 128, 512][1],
+            "image_size": 128,
+            "nz": 100,
+            "ngf": 64,
+            "ndf": 64,
+            # [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+            "epoch": [1 << i for i in range(14)][
+                -1
+            ],  # List or range of power of 2
+            "lr": {
+                "stable": 2e-4,
+                "momentum_based": 2e-4,  # Need to figure out how to really finish this, or code this thing up.
             },
-        },
+            "beta_1": 0.5,
+            "label_smoothing": 0.1,  # Taken from the gan improvement paper
+            "extra_layers_d": 0,
+            "extra_layers_g": 1,  # This will allow the generaetor to be slightly more powerful.
+        }
+        # "initial": {
+        #     "train": (run_test := (False)),  # if True, we will not test the model
+        #     "test": not run_test,
+        #     "gan": (valid := (True)),  # If this is True, then Conv will run the program to show how conv works
+        #     # Once again this is more for training, and to understand certain principles. and not for the core project
+        #     # the initial folder is based for the first part of the project, purely to understand things.
+        #     "conv": not valid,
+        #     "params": {
+        #         "latent_vector": 100,  # 100 | 128 | 256
+        #         "image_size": 64,
+        #         "noise_vector": 64,  # This is the amount of noise vectors we want Wise to keep this the same as the image size
+        #         "output": 3,
+        #         "batch_size": [32, 64, 128, 256, 512, 1024][-2],
+        #         "lr": [0.0001, 0.0005, 0.001, 0.00146][0],
+        #         "ds_type": "human",  # Human , cat, dog : Human ds May require extra data
+        #     },
+        # },
     }
 
 
