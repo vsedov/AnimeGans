@@ -29,7 +29,13 @@ class DSBuilder:
         imgs = []
         for i in range(len(dirs)):
             sub_dir = os.path.join(self.danbooru_path, dirs[i])
-            imgs = imgs + ([os.path.join(sub_dir, f) for f in os.listdir(sub_dir) if f.endswith((".jpg", ".png"))])
+            imgs = imgs + (
+                [
+                    os.path.join(sub_dir, f)
+                    for f in os.listdir(sub_dir)
+                    if f.endswith((".jpg", ".png"))
+                ]
+            )
         ic(f"There is : {len(dirs)} classes and a total of {len(imgs)}")
         pool = Pool(12)  # 1t workers
         pool.map(self.proc_image, imgs)
@@ -71,10 +77,10 @@ class DSBuilder:
     def crop_face(self, im, face_pos, m):
         x, y, w, h = face_pos.x, face_pos.y, face_pos.width, face_pos.height
         size_x, size_y = im.size
-        new_x = max(0, x - m*w)
-        new_y = max(0, y - m*h)
-        new_w = min(w + 2*m*w, size_x - new_x)
-        new_h = min(h + 2*m*h, size_y - new_y)
+        new_x = max(0, x - m * w)
+        new_y = max(0, y - m * h)
+        new_w = min(w + 2 * m * w, size_x - new_x)
+        new_h = min(h + 2 * m * h, size_y - new_y)
         return im.crop((new_x, new_y, new_x + new_w, new_y + new_h))
 
     def crop(self, img, min_side):
@@ -90,8 +96,12 @@ class DSBuilder:
 
 
 class AnimeManualBuilder(DSBuilder):
-
-    def __init__(self, path: str, download_default: bool = False, create_dataset: bool = False,):
+    def __init__(
+        self,
+        path: str,
+        download_default: bool = False,
+        create_dataset: bool = False,
+    ):
         super().__init__()
         self.path = path
 
@@ -100,7 +110,9 @@ class AnimeManualBuilder(DSBuilder):
         self.gallery_path = f"{self.path}/gallery-dl"
         self.danbooru_path = f"{self.gallery_path}/danbooru"
 
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "tags.txt")) as f:
+        with open(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "tags.txt")
+        ) as f:
             self.tags = f.read().split("\n")
         os.chdir(self.path)
 
@@ -120,12 +132,17 @@ class AnimeManualBuilder(DSBuilder):
         for tag in self.tags:
             ic(tag)
             if not os.path.isdir(f"{self.danbooru_path}/{tag}"):
-                os.system("gallery-dl --range 1-100 " + f" 'https://danbooru.donmai.us/posts?tags={tag}'")
+                os.system(
+                    "gallery-dl --range 1-100 "
+                    + f" 'https://danbooru.donmai.us/posts?tags={tag}'"
+                )
 
     def get_data_from_default(self) -> None:
-        if not self.dir_check() or not os.path.isfile(f"{self.path}/gallery-dl/anime-face.tar.gz"):
+        if not self.dir_check() or not os.path.isfile(
+            f"{self.path}/gallery-dl/anime-face.tar.gz"
+        ):
             return
-        if (not os.path.isdir(f"{self.path}/gallery-dl/anime-face") and self.use_default):
+        if not os.path.isdir(f"{self.path}/gallery-dl/anime-face") and self.use_default:
             os.system("tar xzvf anime-faces.tar.gz")
 
     def __call__(self):
@@ -158,17 +175,25 @@ def create_image_folder(create_dataset: bool = False, use_default: bool = False)
             ImageFolder of what ever desired tags that you wish to use.
     """
     current_path = os.path.dirname(os.path.realpath(__file__))
-    data = AnimeManualBuilder(current_path, download_default=use_default, create_dataset=create_dataset,)
+    data = AnimeManualBuilder(
+        current_path,
+        download_default=use_default,
+        create_dataset=create_dataset,
+    )
     data()
     return ds.ImageFolder(
         root=data.get_path(),
-        transform=transforms.Compose([
-            transforms.Resize(hp.get_core("image_size")),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ]),
+        transform=transforms.Compose(
+            [
+                transforms.Resize(hp.get_core("image_size")),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        ),
     )
 
 
 def create_data_loader(dataset, batch_size, shuffle, num_workers):
-    return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    return torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
+    )

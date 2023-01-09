@@ -19,7 +19,6 @@ def setup_extra_constants():
 
 
 def setup_globals():
-
     @hp_register
     def to_default_device(*pointer):
         """Quick way to force default device to cuda"""
@@ -37,8 +36,9 @@ def setup_globals():
         elif classname.find("BatchNorm") != -1:
             m.weight.data.normal_(1.0, 0.02)
             m.bias.data.fill_(0)
-    @hp_register 
-    def get_core(param, default = None): 
+
+    @hp_register
+    def get_core(param, default=None):
         return hc.core.get(param, default)
 
     @hp_register

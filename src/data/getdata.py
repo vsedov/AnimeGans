@@ -39,9 +39,7 @@ class DSDownloader:
             return
         self.check_zip()
 
-        with zipfile.ZipFile(
-            f"{self.zip_location}/{self.zip_name}", "r"
-        ) as zip_ref:
+        with zipfile.ZipFile(f"{self.zip_location}/{self.zip_name}", "r") as zip_ref:
             zip_ref.extractall(self.unzip_dir)
 
     def check_current_path_file(self, filename):

@@ -37,13 +37,11 @@ def constants():
             "batch_size": [64, 128, 512][1],
             "image_size": 128,
             "nz": 100,
-            "nc":3,
+            "nc": 3,
             "ngf": 64,
             "ndf": 64,
             # [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
-            "epoch": [1 << i for i in range(14)][
-                -1
-            ],  # List or range of power of 2
+            "epoch": [1 << i for i in range(14)][-1],  # List or range of power of 2
             "lr": {
                 "stable": 2e-4,
                 "momentum_based": 2e-4,  # Need to figure out how to really finish this, or code this thing up.

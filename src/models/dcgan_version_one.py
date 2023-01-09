@@ -5,7 +5,6 @@ from src.core import hp
 
 
 class DCGanVariantOneGenerator(nn.Module):
-
     def __init__(self, gpu_number, nz, nc, ngf, n_extra_layers_g=None, leaky_relu=0.2):
         super().__init__()
         # This is if you have multiple gpus,
@@ -30,12 +29,21 @@ class DCGanVariantOneGenerator(nn.Module):
 
         if n_extra_layers_g is not None:
             for t in range(n_extra_layers_g):
-                self.gen.add_module(f'extra-layers-{t}-{ngf}-conv', nn.Conv2d(ngf, ngf, 3, 1, 1, bias=False))
-                self.gen.add_module(f'extra-layers_{t}_{ngf}_batchnorm', nn.BatchNorm2d(ngf))
-                self.gen.add_module(f'extra-layers_{t}_{ngf}_relu', nn.LeakyReLU(0.2, inplace=True))
+                self.gen.add_module(
+                    f"extra-layers-{t}-{ngf}-conv",
+                    nn.Conv2d(ngf, ngf, 3, 1, 1, bias=False),
+                )
+                self.gen.add_module(
+                    f"extra-layers_{t}_{ngf}_batchnorm", nn.BatchNorm2d(ngf)
+                )
+                self.gen.add_module(
+                    f"extra-layers_{t}_{ngf}_relu", nn.LeakyReLU(0.2, inplace=True)
+                )
 
-        self.gen.add_module('final_layer_deconv', nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False))  # 5,3,1 for 96x96
-        self.gen.add_module('final_layer_tanh', nn.Tanh())
+        self.gen.add_module(
+            "final_layer_deconv", nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False)
+        )  # 5,3,1 for 96x96
+        self.gen.add_module("final_layer_tanh", nn.Tanh())
 
     def forward(self, input):
         gpu_ids = None
@@ -47,7 +55,6 @@ class DCGanVariantOneGenerator(nn.Module):
 
 
 class DCGanVariantOneDiscriminator(nn.Module):
-
     def __init__(self, gpu_number, nz, nc, ndf, n_extra_layers_d, leaky_relu=0.2):
         self.gpu_number = gpu_number
         self.disc = nn.Sequential(
@@ -67,22 +74,42 @@ class DCGanVariantOneDiscriminator(nn.Module):
             nn.LeakyReLU(leaky_relu, inplace=True),
         )
         for i in range(n_extra_layers_d):
-            self.disc.add_module(f'fextra_layers_{i}_{ndf*8}_conv', nn.Conv2d(ndf * 8, ndf * 8, 3, 1, 1, bias=False))
-            self.disc.add_module(f'fextra_layers_{i}_{ndf*8}_batchnorm', nn.BatchNorm2d(ndf * 8))
-            self.disc.add_module(f'fextra_layers_{i}_{ndf*8}_relu', nn.LeakyReLU(leaky_relu, inplace=True))
+            self.disc.add_module(
+                f"fextra_layers_{i}_{ndf*8}_conv",
+                nn.Conv2d(ndf * 8, ndf * 8, 3, 1, 1, bias=False),
+            )
+            self.disc.add_module(
+                f"fextra_layers_{i}_{ndf*8}_batchnorm", nn.BatchNorm2d(ndf * 8)
+            )
+            self.disc.add_module(
+                f"fextra_layers_{i}_{ndf*8}_relu",
+                nn.LeakyReLU(leaky_relu, inplace=True),
+            )
 
-        self.disc.add_module('final_layers_conv', nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False))
-        self.disc.add_module('final_layers_sigmoid', nn.Sigmoid())
+        self.disc.add_module(
+            "final_layers_conv", nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False)
+        )
+        self.disc.add_module("final_layers_sigmoid", nn.Sigmoid())
 
 
 def evaluation():
     print("With Extra Layers\n")
     hp.show_sum(
         DCGanVariantOneGenerator(
-            1, hp.get_core("nz"), hp.get_core("nc"), hp.get_core("ngf"), hp.get_core("extra_layers_g")))
+            1,
+            hp.get_core("nz"),
+            hp.get_core("nc"),
+            hp.get_core("ngf"),
+            hp.get_core("extra_layers_g"),
+        )
+    )
 
     print("\n\nWithout Extra Layers\n")
-    hp.show_sum(DCGanVariantOneGenerator(1, hp.get_core("nz"), hp.get_core("nc"), hp.get_core("ngf")))
+    hp.show_sum(
+        DCGanVariantOneGenerator(
+            1, hp.get_core("nz"), hp.get_core("nc"), hp.get_core("ngf")
+        )
+    )
 
 
 if __name__ == "__main__":
