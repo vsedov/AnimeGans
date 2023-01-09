@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from icecream import ic
 
-from src.utils.constants import hc
+from src.core import hp
 
 
 class DSBuilder:
@@ -97,8 +97,8 @@ class AnimeManualBuilder(DSBuilder):
 
         self.create_dataset = create_dataset
         self.use_default = download_default
-
-        self.danbooru_path = f"{self.path}/gallery-dl/danbooru"
+        self.gallery_path = f"{self.path}/gallery-dl"
+        self.danbooru_path = f"{self.gallery_path}/danbooru"
 
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "tags.txt")) as f:
             self.tags = f.read().split("\n")
@@ -106,6 +106,11 @@ class AnimeManualBuilder(DSBuilder):
 
     def dir_check(self):
         return os.path.isdir(f"{self.path}/gallery-dl")
+
+    def get_path(self):
+        if self.use_default:
+            return f"{self.gallery_path}/anime-faces/"
+        return f"{self.gallery_path}/custom_faces/"
 
     def get_data_from_danbooru(self) -> None:
         """Download data from danbooru"""
@@ -132,14 +137,33 @@ class AnimeManualBuilder(DSBuilder):
                 self.construct_face_dataset()
 
 
-# High level class to create the dataloaders that we will be working with
-def create_image_folder(create_dataset: bool = True, use_default: bool = False):
+def create_image_folder(create_dataset: bool = False, use_default: bool = False):
+    """Create image folder
+
+    Parameters
+    ----------
+    create_dataset : bool
+        This is a boolean value that states if we want to create the datasets and the file locations meaning that do you
+        want to create the images, this by default is set to False. Set this to True, if you are going to run this for
+        the first time.
+    use_default : bool
+        There are two types of datasets with unique tags that you can use right now.
+        1. Default dataset which is the big zip file: this is not custom
+        2. Custom dataset which will be based on the user. Ideally this dataset will contain certain tags -
+            you will have to train this on your own.
+
+    Returns
+    -------
+        torchvision.datasets.ImageFolder
+            ImageFolder of what ever desired tags that you wish to use.
+    """
     current_path = os.path.dirname(os.path.realpath(__file__))
-    AnimeManualBuilder(current_path, download_default=use_default, create_dataset=create_dataset,)()
+    data = AnimeManualBuilder(current_path, download_default=use_default, create_dataset=create_dataset,)
+    data()
     return ds.ImageFolder(
-        root=current_path,
+        root=data.get_path(),
         transform=transforms.Compose([
-            transforms.Scale(hc.core.image_size),
+            transforms.Resize(hp.get_core("image_size")),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ]),
