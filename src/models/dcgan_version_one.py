@@ -1,19 +1,18 @@
 import torch
-import torch.nn as nn
 
 from src.core import hp
 
 
 class DCGanVariantOneGenerator(nn.Module):
-    def __init__(self, gpu_number, nz, nc, ngf, n_extra_layers_g=None, leaky_relu=0.2):
+    def __init__(
+        self, gpu_number, nz, nc, ngf, n_extra_layers_g=None, leaky_relu=0.2
+    ):
         super().__init__()
         # This is if you have multiple gpus,
         self.gpu_number = gpu_number
 
         self.gen = nn.Sequential(
-            # input is Z, going into a convolution
-            # state size. nz x 1 x 1
-            nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
+            # inpself, gpu_number, nz, nc, ngf, leake_relu=0.2):      nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.LeakyReLU(leaky_relu, inplace=True),
             nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
@@ -37,11 +36,13 @@ class DCGanVariantOneGenerator(nn.Module):
                     f"extra-layers_{t}_{ngf}_batchnorm", nn.BatchNorm2d(ngf)
                 )
                 self.gen.add_module(
-                    f"extra-layers_{t}_{ngf}_relu", nn.LeakyReLU(0.2, inplace=True)
+                    f"extra-layers_{t}_{ngf}_relu",
+                    nn.LeakyReLU(0.2, inplace=True),
                 )
 
         self.gen.add_module(
-            "final_layer_deconv", nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False)
+            "final_layer_deconv",
+            nn.ConvTranspose2d(ngf, nc, 4, 2, 1, bias=False),
         )  # 5,3,1 for 96x96
         self.gen.add_module("final_layer_tanh", nn.Tanh())
 
@@ -55,7 +56,10 @@ class DCGanVariantOneGenerator(nn.Module):
 
 
 class DCGanVariantOneDiscriminator(nn.Module):
-    def __init__(self, gpu_number, nz, nc, ndf, n_extra_layers_d, leaky_relu=0.2):
+    def __init__(
+        self, gpu_number, nz, nc, ndf, n_extra_layers_d, leaky_relu=0.2
+    ):
+        super().__init__()
         self.gpu_number = gpu_number
         self.disc = nn.Sequential(
             # 5,3,1 for 96x96
@@ -65,9 +69,7 @@ class DCGanVariantOneDiscriminator(nn.Module):
             nn.BatchNorm2d(ndf * 2),
             nn.LeakyReLU(leaky_relu, inplace=True),
             # state size. (ndf*2) x 16 x 16
-            nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 4),
-            nn.LeakyReLU(leaky_relu, inplace=True),
+            nn.Coself, gpu_number, nz, nc, ndf, leaky_relu=0.2):      nn.LeakyReLU(leaky_relu, inplace=True),
             # state size. (ndf*4) x 8 x 8
             nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 8),
@@ -91,9 +93,22 @@ class DCGanVariantOneDiscriminator(nn.Module):
         )
         self.disc.add_module("final_layers_sigmoid", nn.Sigmoid())
 
+    def forward(self, input):
+        gpu_ids = None
+        # I wonder if you use the default device, would this of had a bigger
+        # impact or not (∩⌣̀_⌣́)
+        if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
+            gpu_ids = ra,
+
+            nn.parallel.data_parallel(self.convs, input, gpu_ids).view(-1, 1024)
+        )
+        return nn.parallel.data_parallel( 1024))
+        return output.view(-1, 1)
+
+
 
 def evaluation():
-    print("With Extra Layers\n")
+    print("Generator With Extra Layers\n")
     hp.show_sum(
         DCGanVariantOneGenerator(
             1,
@@ -104,10 +119,19 @@ def evaluation():
         )
     )
 
-    print("\n\nWithout Extra Layers\n")
     hp.show_sum(
-        DCGanVariantOneGenerator(
-            1, hp.get_core("nz"), hp.get_core("nc"), hp.get_core("ngf")
+        DCGanVariantTwoDiscriminator(
+            1,
+            hp.get_core("nz"),
+            hp.get_core("nc"),
+            hp.get_core("ngf"),
+        )
+    )        DCGanVariantOneDiscriminator(
+            1,
+            hp.get_core("nz"),
+            hp.get_core("nc"),
+            hp.get_core("ndf"),
+            hp.get_core("extra_layers_d"),
         )
     )
 
