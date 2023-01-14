@@ -1,4 +1,15 @@
 [[package]]
+name = "animeface"
+version = "2.0.0"
+description = "A library to detect anime faces in images."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pillow = "*"
+
+[[package]]
 name = "appnope"
 version = "0.1.3"
 description = "Disable App Nap on macOS >= 10.9"
@@ -1149,7 +1160,7 @@ jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
 
 [[package]]
 name = "ruff"
-version = "0.0.171"
+version = "0.0.209"
 description = "An extremely fast Python linter, written in Rust."
 category = "main"
 optional = false
@@ -1160,7 +1171,7 @@ develop = false
 type = "git"
 url = "https://github.com/charliermarsh/ruff"
 reference = "main"
-resolved_reference = "dfd6225d8542a6b2839807aeee211ce285cf84a0"
+resolved_reference = "731f3a74a93826ebdcfb7c3385bda26781ec6864"
 
 [[package]]
 name = "scikit-image"
@@ -1426,30 +1437,6 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
-name = "torchmetrics"
-version = "0.11.0"
-description = "PyTorch native Metrics"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-numpy = ">=1.17.2"
-packaging = "*"
-torch = ">=1.8.1"
-
-[package.extras]
-all = ["lpips", "nltk (>=3.6)", "pycocotools", "pystoi", "pytorch-lightning (>=1.5)", "regex (>=2021.9.24)", "scipy", "torch-fidelity", "torchvision", "torchvision (>=0.8)", "tqdm (>=4.41.0)", "transformers (>=4.10.0)"]
-audio = ["pystoi"]
-detection = ["pycocotools", "torchvision (>=0.8)"]
-docs = ["docutils (>=0.16)", "myst-parser", "nbsphinx (>=0.8)", "pandoc (>=1.0)", "sphinx (>=4.0,<5.0)", "sphinx-autodoc-typehints (>=1.0)", "sphinx-copybutton (>=0.3)", "sphinx-paramlinks (>=0.5.1)", "sphinx-togglebutton (>=0.2)", "sphinxcontrib-fulltoc (>=1.0)", "sphinxcontrib-mockautodoc"]
-image = ["lpips", "scipy", "torch-fidelity", "torchvision"]
-integrate = ["pytorch-lightning (>=1.5)"]
-multimodal = ["transformers (>=4.10.0)"]
-test = ["bert-score (==0.3.10)", "check-manifest", "cloudpickle (>=1.3)", "coverage (>5.2)", "dython", "fast-bss-eval (>=0.1.0)", "fire", "huggingface-hub (<0.7)", "jiwer (>=2.3.0)", "kornia (>=0.6.7)", "mir-eval (>=0.6)", "mypy (==0.982)", "netcal", "pandas", "phmdoctest (>=1.1.1)", "pre-commit (>=1.0)", "psutil", "pycocotools", "pypesq (>1.2)", "pytest (>=6.0.0,<7.0.0)", "pytest-cov (>2.10)", "pytest-doctestplus (>=0.9.0)", "pytest-rerunfailures (>=10.0)", "pytest-timeout", "pytorch-msssim (==0.2.1)", "requests", "rouge-score (>=0.0.4)", "sacrebleu (>=2.0.0)", "scikit-image (>0.17.1)", "scikit-learn (>1.0,<1.1.1)", "scipy", "torch-complex", "transformers (>4.4.0)", "types-PyYAML", "types-emoji", "types-protobuf", "types-requests", "types-setuptools", "types-six", "types-tabulate"]
-text = ["nltk (>=3.6)", "regex (>=2021.9.24)", "tqdm (>=4.41.0)"]
-
-[[package]]
 name = "torchsummary"
 version = "1.5.1"
 description = "Model summary in PyTorch similar to `model.summary()` in Keras"
@@ -1607,9 +1594,33 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "07621798f444bea82b76902061861dc0d2dd92c94941afdcd19a12b8236dc727"
+content-hash = "9d6c080bc05f073bdf359e5d931742d0a9be892b5bbe2c93d482b1bb28cf6705"
 
 [metadata.files]
+animeface = [
+    {file = "animeface-2.0.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a6cf31c72476f26a1520afd50051be0065fbaeaf79836371c540c03467c5e5eb"},
+    {file = "animeface-2.0.0-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:506d3d2ddcdfcb61b833d63f8c0dfd3bd22cd98f6fb96e315bde3b9585132452"},
+    {file = "animeface-2.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9f5871be77cfc47e592fe5227aa54ce632c7a3faaef97aac9d3fa040d1c925fa"},
+    {file = "animeface-2.0.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:770aafc22abe0280a30629b3d3ae5e1ac93411602d0b8a4901a5ef12aeb52e9e"},
+    {file = "animeface-2.0.0-cp36-cp36m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0b927b1e70dfa27be59e16e8bf7a39308093c34ac71544468e4b3484623e6f04"},
+    {file = "animeface-2.0.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:82332a7e8b8c7c8a528f6d12f833ed5bb38c608c08f547dfceb7756bd637be29"},
+    {file = "animeface-2.0.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:8465251a77ad9a02e952f066a1c6f25e6e19eae52d797f34a61adbfab2c79d5e"},
+    {file = "animeface-2.0.0-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:a368eafccd5bf5445ff1535b95cdaf6642876cb50153e4be0254bf1ad79537bd"},
+    {file = "animeface-2.0.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b645e18c381dcff1f945d15921c60c7cefa6cc7cc04ed5c81a0b97b82da99624"},
+    {file = "animeface-2.0.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:3feebe2fb74b49c14134b82f0daf65c14490117613270b0cb6cf2531fd20721a"},
+    {file = "animeface-2.0.0-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:53cb09d903c59463b8e15fefa6ad9f07cd73de56c325ba4ee2b90032463a7f20"},
+    {file = "animeface-2.0.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f2ba74bc2aaf6e51aa69f165cb509a38f80525c3c37ed74c2d6cceb8745655cc"},
+    {file = "animeface-2.0.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:821e65c5d31c8bf1e827fd58f5ff93c43552520814d70a749c2758c9f71b6534"},
+    {file = "animeface-2.0.0-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:a594355f0565286c0db7ac272474260b4242712847a5a0fb1e9aafc41fd4b258"},
+    {file = "animeface-2.0.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d78aa90ee82666e1449dbaa2a4aeef18de0026a9cc1b3bc54e1a623184d5b0ed"},
+    {file = "animeface-2.0.0-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:dd463349502a8fa8b1f9f02d8b354287f7e3e0a671a65b592c3d5950d53967af"},
+    {file = "animeface-2.0.0-pp37-pypy37_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:e71bca64bd14384caa8d061c163c962b7e7cd8b86e0128e6374e7b7a0a9a2dc8"},
+    {file = "animeface-2.0.0-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4c10d5316f666c272513151963b07426f40aced9287bc8e95f8bd8294a08986c"},
+    {file = "animeface-2.0.0-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:cce55ffd3ed4254a31aee80ce74cd33c429c35e4da6790c3518d16a3008a8868"},
+    {file = "animeface-2.0.0-pp38-pypy38_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:919b0badb9abbc633fcf9f77591c00aa87435220151677e62dfaa78139c050a1"},
+    {file = "animeface-2.0.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:634119b450b991ba4c78857548520d8241e0d16bd73ed50d159d4fa6ec3ac248"},
+    {file = "animeface-2.0.0.tar.gz", hash = "sha256:be1903008dcc7c150160180491517425cab7cf93365a9c0a917e22ea8bacdb92"},
+]
 appnope = [
     {file = "appnope-0.1.3-py2.py3-none-any.whl", hash = "sha256:265a455292d0bd8a72453494fa24df5a11eb18373a60c7c0430889f22548605e"},
     {file = "appnope-0.1.3.tar.gz", hash = "sha256:02bd91c4de869fbb1e1c50aafc4098827a7a54ab2f39d9dcba6c9547ed920e24"},
@@ -2716,10 +2727,6 @@ torch = [
 torchinfo = [
     {file = "torchinfo-1.7.1-py3-none-any.whl", hash = "sha256:792d429d87814aa9ddfb0f1b9d8c75861edc6099c5d753148064d3217128ff42"},
     {file = "torchinfo-1.7.1.tar.gz", hash = "sha256:7eb76ef0ca2d75aa7bf973451ba3693333ba97e197f8fa69d671b7f636384db4"},
-]
-torchmetrics = [
-    {file = "torchmetrics-0.11.0-py3-none-any.whl", hash = "sha256:f809c3cb86a0bd3d8743df0888040257e20d371a937ff9114f582a60ce1a1c67"},
-    {file = "torchmetrics-0.11.0.tar.gz", hash = "sha256:c838e0491d80775daadd0802e27ae3af112a52086c9ba8cbcd1e2807243c89ac"},
 ]
 torchsummary = [
     {file = "torchsummary-1.5.1-py3-none-any.whl", hash = "sha256:10f41d1743fb918f83293f13183f532ab1bb8f6639a1b89e5f8592ec1919a976"},
