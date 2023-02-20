@@ -91,7 +91,9 @@ class DSBuilder:
         else:
             new_width = min_side
             new_height = size_y * min_side / size_x
-        im = img.resize((int(new_width), int(new_height)), Image.Resampling.LANCZOS)
+        im = img.resize(
+            (int(new_width), int(new_height)), Image.Resampling.LANCZOS
+        )
         return im.crop((0, 0, min_side, min_side))
 
 
@@ -111,7 +113,9 @@ class AnimeManualBuilder(DSBuilder):
         self.danbooru_path = f"{self.gallery_path}/danbooru"
 
         with open(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "tags.txt")
+            os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "tags.txt"
+            )
         ) as f:
             self.tags = f.read().split("\n")
         os.chdir(self.path)
@@ -142,7 +146,10 @@ class AnimeManualBuilder(DSBuilder):
             f"{self.path}/gallery-dl/anime-face.tar.gz"
         ):
             return
-        if not os.path.isdir(f"{self.path}/gallery-dl/anime-face") and self.use_default:
+        if (
+            not os.path.isdir(f"{self.path}/gallery-dl/anime-face")
+            and self.use_default
+        ):
             os.system("tar xzvf anime-faces.tar.gz")
 
     def __call__(self):
@@ -154,7 +161,11 @@ class AnimeManualBuilder(DSBuilder):
                 self.construct_face_dataset()
 
 
-def create_image_folder(create_dataset: bool = False, use_default: bool = False):
+def create_image_folder(
+    create_dataset: bool = False,
+    use_default: bool = False,
+    image_size=hp.get_core("image_size"),
+):
     """Create image folder
 
     Parameters
@@ -185,7 +196,7 @@ def create_image_folder(create_dataset: bool = False, use_default: bool = False)
         root=data.get_path(),
         transform=transforms.Compose(
             [
-                transforms.Resize(hp.get_core("image_size")),
+                transforms.Resize(image_size),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]

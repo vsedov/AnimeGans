@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torch.nn.parallel
 
 from src.core import hp
