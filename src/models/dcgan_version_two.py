@@ -17,9 +17,6 @@ class DCGanVariantTwoGenerator(nn.Module):
         super().__init__()
         self.gpu_number = gpu_number
         self.nz = nz
-        # THE fc (fully connected layers)
-        # https://arxiv.org/abs/1905.02417
-
         self.fcs = nn.Sequential(
             nn.Linear(nz, 1024),
             nn.ReLU(inplace=True),
@@ -28,6 +25,7 @@ class DCGanVariantTwoGenerator(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout(0.5),
         )
+
         self.decode_fcs = nn.Sequential(
             nn.Linear(1024, 1024),
             nn.ReLU(inplace=True),
@@ -35,7 +33,7 @@ class DCGanVariantTwoGenerator(nn.Module):
             nn.Linear(1024, nz),
         )
 
-        self.gen = nn.Sequential(
+        self.convs = nn.Sequential(
             nn.ConvTranspose2d(1024, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.ReLU(inplace=True),
@@ -55,23 +53,21 @@ class DCGanVariantTwoGenerator(nn.Module):
     def forward(self, input):
         input = self.fcs(input.view(-1, self.nz))
         gpu_ids = None
-        # I wonder if you use the default device, would this of had a bigger
-        # impact or not (∩⌣̀_⌣́)
-        if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
+        if (
+            isinstance(input.data, torch.cuda.FloatTensor)
+            and self.gpu_number > 1
+        ):
             gpu_ids = range(self.gpu_number)
-
-        prediction_z = self.decode_fcs(input)
-        return (
-            nn.parallel.data_parallel(
-                self.conv, input.view(-1, 1024, 1, 1), gpu_ids
-            ),
-            prediction_z,
-        )
+        z_prediction = self.decode_fcs(input)
+        input = input.view(-1, 1024, 1, 1)
+        output = nn.parallel.data_parallel(self.convs, input, gpu_ids)
+        return output, z_prediction
 
 
 class DCGanVariantTwoDiscriminator(nn.Module):
-    def __init__(self, gpu_number, nz, nc, ndf, leaky_relu=0.2):
+    def __init__(self, gpu_number, nz, nc, ndf, leake_relu=0.2):
         super().__init__()
+        self.gpu_number = gpu_number
         self.convs = nn.Sequential(
             nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
@@ -98,11 +94,13 @@ class DCGanVariantTwoDiscriminator(nn.Module):
 
     def forward(self, input):
         gpu_ids = None
-        if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
+        if (
+            isinstance(input.data, torch.cuda.FloatTensor)
+            and self.gpu_number > 1
+        ):
             gpu_ids = range(self.gpu_number)
-        output = self.fcs(
-            nn.parallel.data_parallel(self.convs, input, gpu_ids).view(-1, 1024)
-        )
+        output = nn.parallel.data_parallel(self.convs, input, gpu_ids)
+        output = self.fcs(output.view(-1, 1024))
         return output.view(-1, 1)
 
 
@@ -132,5 +130,3 @@ def evaluation():
 
 if __name__ == "__main__":
     exit(evaluation())
-else:
-    pass
