@@ -43,9 +43,8 @@ In addition, it seems that more data processing will be necessary, since there a
 While Cats and Dogs is a poorly structured dataset, Human Faces yielded beneficial results and was trained over 1000 epochs and 3 days.
 Comparing the cosine distance of the gradients allowed me to get a deeper knowledge of how and why mode collapse occurs. As noted in the report, this does not offer a quantitative assessment of how severe the mode collapse is, but it does provide a clear picture of how and why it occurs.
 
-
 In addition, at the conclusion of the training, I discovered that the convergence for human faces had failed owing to the gradient ascent change shown in the dcgan study.
-To resolve this, I will need further time and network testing. 
+To resolve this, I will need further time and network testing.
 
 <p align="center">
   <img
@@ -61,25 +60,35 @@ To resolve this, I will need further time and network testing.
   />
 </p>
 
-## How to run this project ? 
+## How to run this project ?
 
 ### Constants
-Constants are stored in 
+
+Constants are stored in
+
 ```
 src/utils/constant.py
 ```
 
 ### Running Module
+
 To run the module, and to train fake data, you can run python -m src
 Although this will be changed in the future.
 
 There are two core parameters at the time of writing that you will need to run; to test a model you  must go into the
 constants file, and switch the boolean value | to run tests you must switch the run_test boolean operator
+
 ```
 python -m src
 ```
 
 ### Future Scope
+
 In the future, there will be a refactoring, on the 10th and will have a json file that you can reference to. Instead of
 manually running data.
 
+### Past
+
+To view my initial gan and my structure please review the following commit
+`3844e3ec`
+This will contain the core code which allowed for this base line to occour.
