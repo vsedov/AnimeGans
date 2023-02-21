@@ -1,5 +1,6 @@
-import wandb
 from loguru import logger as log
+
+import wandb
 
 log.info("Starting wandb")
 
