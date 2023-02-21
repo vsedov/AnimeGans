@@ -200,11 +200,11 @@ def main(
                 fake, _ = net_gen(fixed_noise)
                 vutils.save_image(
                     fake.data[0:64, :, :, :],
-                    "%s/fake_samples_epoch_%03d.png" % (opt.outDir, epoch),
+                    "%s/fake_samples_epoch_varient_one%03d.png"
+                    % (opt.outDir, epoch),
                     nrow=8,
                 )
         if epoch % 1 == 0:
-            # do checkpointing
             torch.save(
                 net_gen.state_dict(),
                 "%s/netG_epoch_%d.pth" % (opt.outDir, epoch),
