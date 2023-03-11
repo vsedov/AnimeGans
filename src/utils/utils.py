@@ -1,9 +1,9 @@
+"""
+Note:
+    This file May be empty as im using an advance method to parse helper
+    functions Please refer to : `src.utils.constants.constants`
+"""
 import os
-from pathlib import Path
-
-
-def project_root():
-    return Path(__file__).parent.parent.parent
 
 
 def current_path():
