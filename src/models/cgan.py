@@ -1,12 +1,35 @@
 import torch
-import torch.nn as nn
+from torch import nn
+
+# The model if you use the other dataset.
 
 
 class Generator(nn.Module):
-    def __init__(self, n_z, n_c, relu_slope=0.2):
+    """
+    A class to define the Generator model of a Generative Adversarial Network (GAN).
+
+    Attributes:
+        latent_dim (int): The size of the latent space.
+        class_dim (int): The size of the class space.
+        relu_slope (float, optional): The slope of the negative part of the leaky ReLU activation function.
+        generator (nn.Sequential): A sequential container to stack the transposed convolutional layers.
+        class_embedding (nn.Sequential): A sequential container to stack the class embedding layers.
+        feature_embedding (nn.Sequential): A sequential container to stack the feature embedding layers.
+    """
+
+    def __init__(self, latent_dim, class_dim, relu_slope=0.2):
+        """
+        The constructor of the `Generator` class.
+
+        Args:
+            latent_dim (int): The size of the latent space.
+            class_dim (int): The size of the class space.
+            relu_slope (float, optional): The slope of the negative part of the leaky ReLU activation function.
+        """
         super().__init__()
-        self.n_z = n_z
-        self.classifier = n_c
+
+        self.latent_dim = latent_dim
+        self.class_dim = class_dim
         self.relu_scope = relu_slope
 
         self.generator = nn.Sequential(
@@ -62,7 +85,7 @@ class Generator(nn.Module):
         )
         self.feature_embedding = nn.Sequential(
             nn.ConvTranspose2d(
-                in_channels=self.n_z,
+                in_channels=self.latent_dim,
                 out_channels=1024,
                 kernel_size=4,
                 stride=1,
@@ -74,19 +97,33 @@ class Generator(nn.Module):
 
     @property
     def device(self):
+        """
+        Returns the device that the model is on.
+
+        Returns:
+            torch.device: The device the model is on.
+        """
         return next(self.parameters()).device
 
     def forward(self, inputs, class_vals):
+        """
+        The forward pass of the model.
+
+        Args:
+            inputs (torch.Tensor): The input tensor with shape `(batch_size, latent_dim)`.
+            class_vals (torch.Tensor): The class values tensor with shape `(batch_size, class_dim)`.
+
+        Returns:
+            torch.Tensor: The output tensor with shape `(batch_size, 3, image_size, image_size)`.
+        """
+        feature_embedded = self.feature_embedding(
+            inputs.unsqueeze(2).unsqueeze(3)
+        )
+        class_embedded = self.class_embedding(
+            class_vals.unsqueeze(2).unsqueeze(3)
+        )
         return self.generator(
-            torch.cat(
-                (
-                    self.feature_embedding(
-                        inputs.unsqueeze(2).unsqueeze(3),
-                        class_vals.unsqueeze(2).unsqueeze(3),
-                    )
-                ),
-                dim=1,
-            )
+            torch.cat((feature_embedded, class_embedded), dim=1)
         )
 
 

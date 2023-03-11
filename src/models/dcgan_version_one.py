@@ -8,11 +8,8 @@ class DCGanVariantOneGenerator(nn.Module):
         self, gpu_number, nz, nc, ngf, n_extra_layers_g=None, leaky_relu=0.2
     ):
         super().__init__()
-        # This is if you have multiple gpus,
         self.gpu_number = gpu_number
-
         self.gen = nn.Sequential(
-            # inpself, gpu_number, nz, nc, ngf, leake_relu=0.2):      nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.LeakyReLU(leaky_relu, inplace=True),
             nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
@@ -69,7 +66,7 @@ class DCGanVariantOneDiscriminator(nn.Module):
             nn.BatchNorm2d(ndf * 2),
             nn.LeakyReLU(leaky_relu, inplace=True),
             # state size. (ndf*2) x 16 x 16
-            nn.Coself, gpu_number, nz, nc, ndf, leaky_relu=0.2):      nn.LeakyReLU(leaky_relu, inplace=True),
+            # nn.Coself, gpu_number, nz, nc, ndf, leaky_relu=0.2):      nn.LeakyReLU(leaky_relu, inplace=True),
             # state size. (ndf*4) x 8 x 8
             nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 8),
@@ -95,14 +92,9 @@ class DCGanVariantOneDiscriminator(nn.Module):
 
     def forward(self, input):
         gpu_ids = None
-        # I wonder if you use the default device, would this of had a bigger
-        # impact or not (∩⌣̀_⌣́)
         if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
-            gpu_ids = ra,
-
             nn.parallel.data_parallel(self.convs, input, gpu_ids).view(-1, 1024)
-        )
-        return nn.parallel.data_parallel( 1024))
+
         return output.view(-1, 1)
 
 
