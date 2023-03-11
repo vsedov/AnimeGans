@@ -91,6 +91,7 @@ def parse_args():
 
     return parser.parse_args()
 
+
 def main(args):
     if args.wandb == "true":
         wandb.init(project=args.wandb_project, entity="core")
@@ -119,3 +120,47 @@ def main(args):
     smooth = 0.9
     config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
 
+    # Create directories
+    random_sample_dir = os.path.join(
+        args.sample_dir, config, "random_generation"
+    )
+    fixed_attribute_dir = os.path.join(
+        args.sample_dir, config, "fixed_attributes"
+    )
+    checkpoint_dir = os.path.join(args.checkpoint_dir, config)
+    for directory in [random_sample_dir, fixed_attribute_dir, checkpoint_dir]:
+        os.makedirs(directory, exist_ok=True)
+
+    # Initialize models and optimizers
+    G = Generator(latent_dim=latent_dim, class_dim=num_classes).to(device)
+    D = Discriminator(hair_classes=hair_classes, eye_classes=eye_classes).to(
+        device
+    )
+    if args.wandb == "true":
+        wandb.watch(G)
+        wandb.watch(D)
+
+    G_optim = optim.Adam(G.parameters(), betas=[args.beta, 0.999], lr=args.lr)
+    D_optim = optim.Adam(D.parameters(), betas=[args.beta, 0.999], lr=args.lr)
+
+    # Load checkpoint if it exists
+    start_step = 0
+    models = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
+    max_n = -1
+    for model in models:
+        n = int(re.findall(r"\d+", model)[-1])
+        max_n = max(max_n, n)
+    if max_n != -1:
+        G, G_optim, start_step = load_model(
+            G, G_optim, os.path.join(checkpoint_dir, "G_{}.ckpt".format(max_n))
+        )
+        D, D_optim, start_step = load_model(
+            D, D_optim, os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n))
+        )
+        print("Epoch start: ", start_step)
+
+    # Define loss function
+    criterion = nn.BCELoss()
+
+    if args.wandb == "true":
+        wandb.watch(criterion)
