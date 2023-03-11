@@ -15,6 +15,7 @@ types/
 wandb/
 img_align_celeba/
 checkpoints/
+*.png
 
 
 # Distribution / packaging
