@@ -6,7 +6,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
-from src.utils.utils import project_root
+from src.core import hc
 
 
 class AttrDataset(Dataset):
@@ -87,8 +87,7 @@ def validate_data_loader(train_loader):
             break
 
 
-project_root = f"{project_root()}/src"
-path_data = f"{project_root}/data/"
+path_data = f"{hc.DIR}/data/"
 
 transform_anime = transforms.Compose(
     [
@@ -100,7 +99,7 @@ transform_anime = transforms.Compose(
 
 
 generated_dataset = get_dataset(
-    f"{project_root}/create_data/features.csv", path_data, transform_anime
+    f"{hc.DIR}/create_data/features.csv", path_data, transform_anime
 )
 
 train_loader = get_dataloader(
