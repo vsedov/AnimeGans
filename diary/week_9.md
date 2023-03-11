@@ -27,3 +27,4 @@ This resolved the problem
 
 By the conclusion of this week, I had acquired a great deal of fresh, intriguing notions.
 Although some may not be presented in the report due to relevance, moving forward I will redo my entire report in a research-based manner, and restructure all my findings correctly. I will also reevaluate my research in a more mathematical manner, without having a very messy layout regarding where to place data, which I have discovered happens quite often with me.
+
