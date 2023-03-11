@@ -90,3 +90,32 @@ def parse_args():
     )
 
     return parser.parse_args()
+
+def main(args):
+    if args.wandb == "true":
+        wandb.init(project=args.wandb_project, entity="core")
+        wandb.config.update(
+            {
+                "batch_size": args.batch_size,
+                "iterations": args.iterations,
+                "lr": args.lr,
+                "beta": args.beta,
+                "sample_dir": args.sample_dir,
+                "checkpoint_dir": args.checkpoint_dir,
+                "sample": args.sample,
+                "hair_classes": len(hair),
+                "eye_classes": len(eyes),
+            }
+        )
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Define configuration
+    batch_size = args.batch_size
+    iterations = args.iterations
+    hair_classes, eye_classes = len(hair), len(eyes)
+    num_classes = hair_classes + eye_classes
+    latent_dim = 128
+    smooth = 0.9
+    config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
+
