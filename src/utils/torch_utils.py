@@ -107,3 +107,26 @@ def load_model(model, optimizer, file_path):
     start_step = prev_state["step"]
 
     return model, optimizer, start_step
+
+def get_random_label(batch_size, hair_classes, eye_classes):
+    """Sample a batch of random class labels for hair and eye color.
+
+    Args:
+        batch_size (int): number of labels to sample.
+        hair_classes (int): number of hair color classes.
+        eye_classes (int): number of eye color classes.
+
+    Returns:
+        torch.Tensor: A tensor of size (batch_size, hair_classes + eye_classes) representing the one-hot encoded class labels.
+    """
+    hair_code = torch.zeros(batch_size, hair_classes)
+    eye_code = torch.zeros(batch_size, eye_classes)
+
+    hair_type = torch.randint(0, hair_classes, (batch_size,))
+    eye_type = torch.randint(0, eye_classes, (batch_size,))
+
+    hair_code[range(batch_size), hair_type] = 1
+    eye_code[range(batch_size), eye_type] = 1
+
+    return torch.cat((hair_code, eye_code), dim=1)
+
