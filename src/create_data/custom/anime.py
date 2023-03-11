@@ -4,10 +4,9 @@ from multiprocessing import Pool
 import animeface
 import numpy as np
 import torch
-import torchvision.datasets as ds
-import torchvision.transforms as transforms
 from PIL import Image
 from icecream import ic
+from torchvision import datasets as ds, transforms
 
 from src.core import hp
 
@@ -206,7 +205,5 @@ def create_image_folder(
 
 def create_data_loader(dataset, batch_size, shuffle, num_workers):
     return torch.utils.data.DataLoader(
-
         dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers
-
     )
