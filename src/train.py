@@ -164,3 +164,121 @@ def main(args):
 
     if args.wandb == "true":
         wandb.watch(criterion)
+
+    ########## Start Training ##########
+    for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
+        if epoch < start_step:
+            continue
+
+        for step_i, (real_img, hair_tags, eye_tags) in enumerate(
+            tqdm.tqdm(train_loader, desc="Inner Epoch Loop")
+        ):
+            real_label = torch.ones(batch_size, device=device)
+            fake_label = torch.zeros(batch_size, device=device)
+            soft_label = torch.Tensor(batch_size).uniform_(smooth, 1).to(device)
+            real_img, hair_tags, eye_tags = (
+                real_img.to(device),
+                hair_tags.to(device),
+                eye_tags.to(device),
+            )
+
+            # Train discriminator
+            z = torch.randn(batch_size, latent_dim, device=device)
+            fake_tag = get_random_label(
+                batch_size=batch_size,
+                hair_classes=hair_classes,
+                eye_classes=eye_classes,
+            ).to(device)
+            fake_img = G(z, fake_tag).to(device)
+
+            real_score, real_hair_predict, real_eye_predict = D(real_img)
+            fake_score, _, _ = D(fake_img)
+
+            real_discrim_loss = criterion(real_score, soft_label)
+            fake_discrim_loss = criterion(fake_score, fake_label)
+
+            real_hair_aux_loss = criterion(real_hair_predict, hair_tags)
+            real_eye_aux_loss = criterion(real_eye_predict, eye_tags)
+            real_classifier_loss = real_hair_aux_loss + real_eye_aux_loss
+
+            discrim_loss = (real_discrim_loss + fake_discrim_loss) * 0.5
+
+            D_loss = discrim_loss + real_classifier_loss
+            D_optim.zero_grad()
+            D_loss.backward()
+            D_optim.step()
+
+            # Train generator
+            z = torch.randn(batch_size, latent_dim, device=device)
+            fake_tag = get_random_label(
+                batch_size=batch_size,
+                hair_classes=hair_classes,
+                eye_classes=eye_classes,
+            ).to(device)
+
+            hair_tag = fake_tag[:, 0:hair_classes]
+            eye_tag = fake_tag[:, hair_classes:]
+            fake_img = G(z, fake_tag).to(device)
+
+            fake_score, hair_predict, eye_predict = D(fake_img)
+            discrim_loss = criterion(fake_score, real_label)
+            hair_aux_loss = criterion(hair_predict, hair_tag)
+            eye_aux_loss = criterion(eye_predict, eye_tag)
+            classifier_loss = hair_aux_loss + eye_aux_loss
+
+            G_loss = classifier_loss + discrim_loss
+            G_optim.zero_grad()
+            G_loss.backward()
+            G_optim.step()
+
+            # Wandb to log data here
+            if args.wandb == "true":
+                wandb.log(
+                    {
+                        "D_loss": D_loss,
+                        "G_loss": G_loss,
+                        "discrim_loss": discrim_loss,
+                        "classifier_loss": classifier_loss,
+                        "hair_aux_loss": hair_aux_loss,
+                        "eye_aux_loss": eye_aux_loss,
+                        "real_loss": real_discrim_loss,
+                        "fake_loss": fake_discrim_loss,
+                    }
+                )
+
+            if epoch == 0 and step_i == 0:
+                vutils.save_image(
+                    real_img, os.path.join(random_sample_dir, "real.png")
+                )
+
+            if step_i % args.sample == 0:
+                vutils.save_image(
+                    fake_img.data.view(batch_size, 3, 64, 64),
+                    os.path.join(
+                        random_sample_dir,
+                        "fake_step_{}_{}.png".format(epoch, step_i),
+                    ),
+                )
+            if step_i == 0:
+                save_model(
+                    model=G,
+                    optimizer=G_optim,
+                    step=epoch,
+                    file_path=os.path.join(
+                        checkpoint_dir, "G_{}.ckpt".format(epoch)
+                    ),
+                )
+
+                generate_by_attributes(
+                    model=G,
+                    device=device,
+                    step=epoch,
+                    latent_dim=latent_dim,
+                    hair_classes=hair_classes,
+                    eye_classes=eye_classes,
+                    sample_dir=fixed_attribute_dir,
+                )
+
+
+def run():
+    main(parse_args())
