@@ -67,8 +67,21 @@
     \section{Introduction}
     We consider the following problem: given a model $M$, we want to find a set of observations $O$ such that every model $M'$ that is consistent with $O$ is also consistent with $M$. In other words, we want to find a set of observations that is sufficient to distinguish between $M$ and any other model that is consistent with $O$. This is a generalization of the problem of finding a set of observations that is sufficient to distinguish between $M$ and any other model that is consistent with $O$ and $M$.
 
+    \subsection{Normal Gans}
 
+    Normal GANs (Generative Adversarial Networks) are a type of deep learning architecture that consists of two parts: a generator and a discriminator. The generator creates synthetic data that aims to mimic the distribution of the real data, while the discriminator tries to distinguish the synthetic data from the real data. The two parts are trained in a adversarial manner, meaning that they are in competition with each other. The outcome of the training process is a generator that can produce synthetic data that is similar to the real data.
 
+    \subsection{DCGANS}
+
+    DCGANs (Deep Convolutional Generative Adversarial Networks) are a variant of GANs that use convolutional layers in both the generator and the discriminator. Convolutional layers are well suited for image generation tasks as they can learn spatial hierarchies of features from the input image. DCGANs have been used successfully in various image generation tasks, such as creating realistic images of faces, landscapes, and animals.
+
+    \subsubsection{DCGANs with Custom Tags}
+
+    DCGANs with custom tags are a modification of the original DCGAN architecture that allows the generation of images with specific attributes or tags. This is achieved by incorporating the desired tags as additional input to the generator and discriminator. During the training process, the generator learns to generate images that match the desired tags while the discriminator tries to distinguish the generated images from the real images with the same tags.
+
+    \subsection{ACGANS with IlustrationVec}
+
+    ACGANs with IlustrationVec (Auxiliary Classifier Generative Adversarial Networks with Illustration Vector) is a variant of GANs that incorporates class information in the form of an illustration vector. The illustration vector provides additional information to the generator about the class of the image it should generate. The generator is trained to not only generate realistic images, but also images that belong to a specific class. The discriminator is trained to not only distinguish the generated images from real images, but also to classify the generated images into the correct class. The outcome of the ACGANs with IlustrationVec training process is a generator that can produce images that are both realistic and belong to a specific class.
 
 
 
