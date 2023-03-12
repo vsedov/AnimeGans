@@ -1,6 +1,10 @@
 import glob
 import os
 import re
+
+# These are helper functions, if you want them imported in
+# from src.core import hp
+import time
 from argparse import ArgumentParser
 
 import torch
@@ -10,12 +14,11 @@ from torchvision import utils as vutils
 
 import wandb
 from src.core import hc
-
-# These are helper functions, if you want them imported in
-# from src.core import hp
 from src.create_data.create_local_dataset import train_loader
 from src.models.ACGAN import Discriminator, Generator
 from src.utils.torch_utils import *
+
+best_g_loss = float("inf")
 
 hair = [
     "orange",
@@ -261,7 +264,22 @@ def main(args):
             G_loss.backward()
             G_optim.step()
 
-            # Wandb to log data here
+            # Print the data
+            print(
+                f"Time: {time.ctime()} Epoch: {epoch + 1}/{iterations} Iteration: {step_i + 1}/{len(train_loader)}\nLoss D: {D_loss.item():.4f} Loss G: {G_loss.item():.4f}"
+            )
+
+            if G_loss.item() < best_g_loss:
+                best_g_loss = G_loss.item()
+
+                print(f"Saving Best Model {G_loss.item()} best loss ")
+                save_model(
+                    model=G,
+                    optimizer=G_optim,
+                    step=epoch,
+                    file_path=os.path.join(checkpoint_dir, "G_best_model.ckpt"),
+                )
+                # Wandb to log data here
             if args.wandb == "true":
                 wandb.log(
                     {
