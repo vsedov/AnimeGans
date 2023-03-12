@@ -19,6 +19,11 @@ class Generator(nn.Module):
 
     Methods:
         __init__(self, latent_dim, class_dim): Initializes the ACGANs with Illustration Vector generator with the specified latent, illustration, and class dimensions.
+
+    Todo :
+        1. Generator requires : Extra layers, for conv, batchnorm and relu , to be another parser [Needs to be implemented]
+        2. Discriminator requires : Extra layers as well, this will ne a remap it would have to be similar to how its done in dcgan version one . But with extended information
+           `from .home.viv.GitHub.active_development.PROJECT.src.models import dcgan_version_one` Refere to this file for better import
     """
 
     def __init__(self, latent_dim, class_dim):
