@@ -101,9 +101,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--wandbp_tensorboard",
+        "--wandb_tensorboard",
         type=str,
-        default="false",
+        default="true",
         help="Use tensorboard Please refer to : https://docs.wandb.ai/guides/integrations/tensorboard",
     )
 
@@ -113,7 +113,6 @@ def parse_args():
 def main(args):
     if args.wandb == "true":
         wandb.init(project=args.wandb_project, name=args.wandb_name)
-
         wandb.config.update(
             {
                 "batch_size": args.batch_size,
@@ -128,7 +127,7 @@ def main(args):
             }
         )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(hc.DEFAULT_DEVICE)
 
     # Define configuration
     batch_size = args.batch_size
@@ -227,6 +226,18 @@ def main(args):
             D_loss.backward()
             D_optim.step()
 
+            if args.wandb == "true":
+                wandb.log(
+                    {
+                        "step": step_i,
+                        "real_discrim_loss": real_discrim_loss.item(),
+                        "fake_discrim_loss": fake_discrim_loss.item(),
+                        "real_hair_aux_loss": real_hair_aux_loss.item(),
+                        "real_eye_aux_loss": real_eye_aux_loss.item(),
+                        "real_classifier_loss hair + eye": real_classifier_loss.item(),
+                    },
+                )
+
             # Train generator
             z = torch.randn(batch_size, latent_dim, device=device)
             fake_tag = get_random_label(
@@ -254,14 +265,12 @@ def main(args):
             if args.wandb == "true":
                 wandb.log(
                     {
-                        "D_loss": D_loss,
-                        "G_loss": G_loss,
+                        "D_loss": D_loss.item(),
+                        "G_loss": G_loss.item(),
                         "discrim_loss": discrim_loss,
-                        "classifier_loss": classifier_loss,
+                        "gen_loss / Classifier loss ": classifier_loss,
                         "hair_aux_loss": hair_aux_loss,
                         "eye_aux_loss": eye_aux_loss,
-                        "real_loss": real_discrim_loss,
-                        "fake_loss": fake_discrim_loss,
                     }
                 )
 
@@ -278,6 +287,7 @@ def main(args):
                         "fake_step_{}_{}.png".format(epoch, step_i),
                     ),
                 )
+
             if step_i == 0:
                 save_model(
                     model=G,

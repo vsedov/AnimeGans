@@ -4,11 +4,9 @@ from collections import namedtuple
 
 import torch
 
+from src.core import hc
 from src.models.ACGAN import Generator
 from src.utils.torch_utils import *
-from src.utils.utils import current_path
-
-current_path = current_path()
 
 
 def parse_args():
@@ -58,7 +56,7 @@ def parse_args():
         "-s",
         "--sample_dir",
         help="Folder to save the generated samples.",
-        default=f"{current_path}/results/generated",
+        default=f"{hc.DIR}results/generated",
         type=str,
     )
     parser.add_argument(
@@ -84,7 +82,8 @@ def parse_args():
     )
 
     args = parser.parse_args()
-    args.gen_model_dir = f"{current_path}/results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
+    args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
+
     return Args(*args.__dict__.values())
 
 

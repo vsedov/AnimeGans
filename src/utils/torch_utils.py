@@ -286,6 +286,7 @@ def fix_noise(model, device, latent_dim, hair_classes, eye_classes, sample_dir):
 
     output = torch.cat(img_list, dim=0)
     vutils.save_image(output, f"{sample_dir}/fix_noise.png", nrow=hair_classes)
+    print(f"{sample_dir}/fix_noise.png Saved")
 
 
 def interpolate(
