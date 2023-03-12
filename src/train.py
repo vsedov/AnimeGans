@@ -4,7 +4,6 @@ import re
 
 # These are helper functions, if you want them imported in
 # from src.core import hp
-import time
 from argparse import ArgumentParser
 
 import torch
@@ -17,8 +16,6 @@ from src.core import hc
 from src.create_data.create_local_dataset import train_loader
 from src.models.ACGAN import Discriminator, Generator
 from src.utils.torch_utils import *
-
-best_g_loss = float("inf")
 
 hair = [
     "orange",
@@ -59,6 +56,21 @@ def parse_args():
         default=5000,
         help="Number of iterations to train Generator",
     )
+    parser.add_argument(
+        "-e",
+        "--extra_generator_layers",
+        type=int,
+        default=2,
+        help="Number of extra layers to train Generator",
+    )
+    parser.add_argument(
+        "-d",
+        "--extra_discriminator_layers",
+        type=int,
+        default=0,
+        help="Number of extra layers to train Discriminator",
+    )
+
     parser.add_argument(
         "-b", "--batch_size", type=int, default=64, help="Training batch size"
     )
@@ -153,10 +165,17 @@ def main(args):
         os.makedirs(directory, exist_ok=True)
 
     # Initialize models and optimizers
-    G = Generator(latent_dim=latent_dim, class_dim=num_classes).to(device)
-    D = Discriminator(hair_classes=hair_classes, eye_classes=eye_classes).to(
-        device
-    )
+    G = Generator(
+        latent_dim=latent_dim,
+        class_dim=num_classes,
+        extra_layers=args.extra_generator_layers,
+    ).to(device)
+    D = Discriminator(
+        hair_classes=hair_classes,
+        eye_classes=eye_classes,
+        extra_layers=args.extra_discriminator_layers,
+    ).to(device)
+
     if args.wandb == "true":
         wandb.watch(G)
         wandb.watch(D)
@@ -168,6 +187,7 @@ def main(args):
     start_step = 0
     models = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
     max_n = -1
+
     for model in models:
         n = int(re.findall(r"\d+", model)[-1])
         max_n = max(max_n, n)
@@ -186,6 +206,7 @@ def main(args):
     if args.wandb == "true":
         wandb.watch(criterion)
 
+    best_g_loss = float("inf")
     ########## Start Training ##########
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
@@ -266,7 +287,7 @@ def main(args):
 
             # Print the data
             print(
-                f"Time: {time.ctime()} Epoch: {epoch + 1}/{iterations} Iteration: {step_i + 1}/{len(train_loader)}\nLoss D: {D_loss.item():.4f} Loss G: {G_loss.item():.4f}"
+                f"Epoch: {epoch + 1}/{iterations} Iteration: {step_i + 1}/{len(train_loader)} Loss D: {D_loss.item():.4f} Loss G: {G_loss.item():.4f}"
             )
 
             if G_loss.item() < best_g_loss:
