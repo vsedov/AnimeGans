@@ -9,12 +9,13 @@ from torch import nn, optim
 from torchvision import utils as vutils
 
 import wandb
+from src.core import hc
+
+# These are helper functions, if you want them imported in
+# from src.core import hp
 from src.create_data.create_local_dataset import train_loader
 from src.models.ACGAN import Discriminator, Generator
 from src.utils.torch_utils import *
-from src.utils.utils import current_path
-
-current_path = current_path()
 
 hair = [
     "orange",
@@ -53,7 +54,7 @@ def parse_args():
         "--iterations",
         type=int,
         default=5,
-        help="Number of iterations to train ACGAN",
+        help="Number of iterations to train Generator",
     )
     parser.add_argument(
         "-b", "--batch_size", type=int, default=64, help="Training batch size"
@@ -62,29 +63,34 @@ def parse_args():
         "-s",
         "--sample_dir",
         type=str,
-        default=f"{current_path}/results/samples",
+        default=f"{hc.DIR}/results/samples",
         help="Directory to store generated images",
     )
     parser.add_argument(
         "-c",
         "--checkpoint_dir",
         type=str,
-        default=f"{current_path}/results/checkpoints",
+        default=f"{hc.DIR}/results/checkpoints",
         help="Directory to save model checkpoints",
     )
     parser.add_argument(
         "--sample", type=int, default=70, help="Sample every n steps"
     )
     parser.add_argument(
-        "--lr", type=float, default=0.0002, help="Learning rate of ACGAN"
+        "--lr",
+        type=float,
+        default=0.0002,
+        help="Learning rate gen and discriminator",
     )
+    # I could modify the parameters : as this is made for acgan
     parser.add_argument(
         "--beta",
         type=float,
         default=0.5,
         help="Momentum term in Adam optimizer",
     )
-    parser.add_argument("--wandb", type=str, default="true", help="Use wandb")
+
+    # Wandb parameters
     parser.add_argument(
         "--wandb_project", type=str, default="core", help="Use wandb"
     )
@@ -95,6 +101,7 @@ def parse_args():
 def main(args):
     if args.wandb == "true":
         wandb.init(project=args.wandb_project, entity="core")
+
         wandb.config.update(
             {
                 "batch_size": args.batch_size,
