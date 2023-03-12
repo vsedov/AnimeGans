@@ -5,17 +5,20 @@ from src.core import hp
 
 
 class Generator(nn.Module):
-    """Adversarial Conditional Generative Adversarial Network (ACGAN) generator.
+    """
+    ACGANs with Illustration Vector generator.
 
-    The ACGAN generator takes a noise vector and a class vector as input and generates an image.
-    The generator is based on the architecture described in the 2016 DCGAN paper, with activation functions and batch
-        normalization following the same structure.
+    The ACGANs with Illustration Vector generator takes a noise vector, an illustration vector, and a class vector as input and generates an image.
+    The generator is trained to generate not only realistic images, but also images that belong to a specific class.
 
     Attributes:
         latent_dim (int): the length of the noise vector
+        illustration_dim (int): the length of the illustration vector
         class_dim (int): the length of the class vector (in one-hot form)
-        gen (nn.Sequential): the main generator structure, a sequence of convolutional transpose layers, batch
-            normalization layers, and activation functions
+        gen (nn.Sequential): the main generator structure, a sequence of transpose convolutional layers, batch normalization layers, and activation functions
+
+    Methods:
+        __init__(self, latent_dim, class_dim): Initializes the ACGANs with Illustration Vector generator with the specified latent, illustration, and class dimensions.
     """
 
     def __init__(self, latent_dim, class_dim):
@@ -105,7 +108,11 @@ class Generator(nn.Module):
 
 
 class Discriminator(nn.Module):
-    """Adversarial Conditional Generative Adversarial Network (ACGAN) discriminator.
+    """
+    ACGANs with Illustration Vector discriminator.
+
+    A discriminator that takes an image, an illustration vector, and a class vector as input and outputs a scalar indicating the probability that the image is real, and a vector of class probabilities indicating the class of the image.
+    The discriminator is trained to not only distinguish the generated images from real images, but also to classify the generated images into the correct class.
 
     A modified version of the Deep Convolutional Generative Adversarial Network (DCGAN) discriminator.
     In addition to the discriminator output, the ACGAN discriminator also classifies the class of the input image
