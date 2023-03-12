@@ -26,7 +26,7 @@ class Generator(nn.Module):
            `from .home.viv.GitHub.active_development.PROJECT.src.models import dcgan_version_one` Refere to this file for better import
     """
 
-    def __init__(self, latent_dim, class_dim, extra_layers=2):
+    def __init__(self, latent_dim, class_dim, extra_layers=1):
         """Initialize the Generator Class with latent_dim and class_dim.
 
         Args:
@@ -38,8 +38,7 @@ class Generator(nn.Module):
         self.latent_dim = latent_dim
         self.class_dim = class_dim
 
-        self.extra_layers = extra_layers
-        self.layers = [
+        self.gen = nn.Sequential(
             nn.ConvTranspose2d(
                 in_channels=self.latent_dim + self.class_dim,
                 out_channels=1024,
@@ -79,32 +78,40 @@ class Generator(nn.Module):
             ),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
+        )
+
+        if extra_layers > 0:
+            for i in range(extra_layers):
+                self.gen.add_module(
+                    f"extra_conv_{i + 1}",
+                    nn.Conv2d(
+                        in_channels=128,
+                        out_channels=128,
+                        kernel_size=3,
+                        stride=1,
+                        padding=1,
+                        bias=False,
+                    ),
+                )
+                self.gen.add_module(
+                    f"extra_batchnorm_{i + 1}", nn.BatchNorm2d(128)
+                )
+                self.gen.add_module(
+                    f"extra_relu_{i + 1}", nn.ReLU(inplace=True)
+                )
+
+        self.gen.add_module(
+            "final_layer_deconv",
             nn.ConvTranspose2d(
                 in_channels=128,
                 out_channels=3,
                 kernel_size=4,
                 stride=2,
                 padding=1,
+                bias=False,
             ),
-            nn.Tanh(),
-        ]
-
-        for _ in range(extra_layers):
-            self.layers.insert(
-                -2,
-                nn.ConvTranspose2d(
-                    in_channels=128,
-                    out_channels=128,
-                    kernel_size=4,
-                    stride=2,
-                    padding=1,
-                    bias=False,
-                ),
-            )
-            self.layers.insert(-2, nn.BatchNorm2d(128))
-            self.layers.insert(-2, nn.ReLU(inplace=True))
-
-        self.gen = nn.Sequential(*self.layers)
+        )
+        self.gen.add_module("final_layer_tanh", nn.Tanh())
 
     @property
     def device(self):
@@ -157,15 +164,13 @@ class Discriminator(nn.Module):
         Args:
             hair_classes (int): the number of hair classes the discriminator needs to classify.
             eye_classes (int): the number of eye classes the discriminator needs to classify.
-            extras (int): extra layers for the discriminator.
         """
         super(Discriminator, self).__init__()
 
         self.hair_classes = hair_classes
         self.eye_classes = eye_classes
-        self.extra_layer = extra_layers
 
-        self.layers = [
+        self.conv_layers = nn.Sequential(
             nn.Conv2d(
                 in_channels=3,
                 out_channels=128,
@@ -205,23 +210,7 @@ class Discriminator(nn.Module):
             ),
             nn.BatchNorm2d(1024),
             nn.LeakyReLU(0.2, inplace=True),
-        ]
-        for _ in range(extra_layers):
-            self.layers.append(
-                nn.Conv2d(
-                    in_channels=1024,
-                    out_channels=1024,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias=False,
-                )
-            )
-            self.layers.append(nn.BatchNorm2d(1024))
-            self.layers.append(nn.LeakyReLU(0.2, inplace=True))
-
-        self.conv_layers = nn.Sequential(*self.layers)
-
+        )
         self.discriminator_layer = nn.Sequential(
             nn.Conv2d(
                 in_channels=1024, out_channels=1, kernel_size=4, stride=1
@@ -250,6 +239,18 @@ class Discriminator(nn.Module):
             nn.Linear(128, self.eye_classes),
             nn.Softmax(),
         )
+        if extra_layers > 0:
+            for i in range(extra_layers):
+                self.bottleneck.add_module(
+                    f"extra_conv_{i + 1}",
+                    nn.Conv2d(1024, 1024, 3, 1, 1, bias=False),
+                )
+                self.bottleneck.add_module(
+                    f"extra_batchnorm_{i + 1}", nn.BatchNorm2d(1024)
+                )
+                self.bottleneck.add_module(
+                    f"extra_relu_{i + 1}", nn.LeakyReLU(0.2, inplace=True)
+                )
 
         return
 
@@ -273,7 +274,7 @@ class Discriminator(nn.Module):
         discrim_output = self.discriminator_layer(features).view(
             -1
         )  # Single-value scalar
-        #
+
         flatten = self.bottleneck(features).squeeze()
         hair_class = self.hair_classifier(
             flatten
