@@ -1,6 +1,5 @@
-import glob
 import os
-import re
+import pathlib
 
 # These are helper functions, if you want them imported in
 # from src.core import hp
@@ -16,6 +15,10 @@ from src.core import hc
 from src.create_data.create_local_dataset import train_loader
 from src.models.ACGAN import Discriminator, Generator
 from src.utils.torch_utils import *
+
+# These are helper functions, if you want them imported in
+# from src.core import hp
+
 
 hair = [
     "orange",
@@ -57,14 +60,14 @@ def parse_args():
         help="Number of iterations to train Generator",
     )
     parser.add_argument(
-        "-e",
+        "-G",
         "--extra_generator_layers",
         type=int,
-        default=2,
+        default=1,
         help="Number of extra layers to train Generator",
     )
     parser.add_argument(
-        "-d",
+        "-D",
         "--extra_discriminator_layers",
         type=int,
         default=0,
@@ -78,14 +81,14 @@ def parse_args():
         "-s",
         "--sample_dir",
         type=str,
-        default=f"{hc.DIR}/results/samples",
+        default=f"{hc.DIR}results/samples",
         help="Directory to store generated images",
     )
     parser.add_argument(
         "-c",
         "--checkpoint_dir",
         type=str,
-        default=f"{hc.DIR}/results/checkpoints",
+        default=f"{hc.DIR}results/checkpoints",
         help="Directory to save model checkpoints",
     )
     parser.add_argument(
@@ -122,6 +125,19 @@ def parse_args():
         help="Use tensorboard Please refer to : https://docs.wandb.ai/guides/integrations/tensorboard",
     )
 
+    parser.add_argument(
+        "--overwrite",
+        type=str,
+        help="Path overwrite, such that if you wish to use this : Batchsize:epoch_ammount is required for given directory 64:120",
+    )
+
+    parser.add_argument(
+        "--use_custom_checkpoint",
+        type=str,
+        default="false",
+        help="Use best model instead [number, best]",
+    )
+
     return parser.parse_args()
 
 
@@ -151,8 +167,14 @@ def main(args):
     num_classes = hair_classes + eye_classes
     latent_dim = 128
     smooth = 0.9
-    config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
 
+    if args.overwrite:
+        x, y = args.overwrite.split(":")
+        config = "ACGAN-[{}]-[{}]".format(x, y)
+    else:
+        config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
+
+    print(config)
     # Create directories
     random_sample_dir = os.path.join(
         args.sample_dir, config, "random_generation"
@@ -161,8 +183,13 @@ def main(args):
         args.sample_dir, config, "fixed_attributes"
     )
     checkpoint_dir = os.path.join(args.checkpoint_dir, config)
-    for directory in [random_sample_dir, fixed_attribute_dir, checkpoint_dir]:
-        os.makedirs(directory, exist_ok=True)
+
+    if not os.path.exists(random_sample_dir):
+        os.makedirs(random_sample_dir)
+    if not os.path.exists(fixed_attribute_dir):
+        os.makedirs(fixed_attribute_dir)
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
 
     # Initialize models and optimizers
     G = Generator(
@@ -185,20 +212,47 @@ def main(args):
 
     # Load checkpoint if it exists
     start_step = 0
-    models = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
     max_n = -1
+    if args.use_custom_checkpoint == "best":
+        G, G_optim, D, D_optim, start_step, max_n = load_model(
+            G,
+            G_optim,
+            os.path.join(checkpoint_dir, "G_best_model.ckpt"),
+        )
+        D, D_optim, start_step, max_n = load_model(
+            D,
+            D_optim,
+            os.path.join(checkpoint_dir, "D_best_model.ckpt"),
+        )
 
-    for model in models:
-        n = int(re.findall(r"\d+", model)[-1])
-        max_n = max(max_n, n)
-    if max_n != -1:
-        G, G_optim, start_step = load_model(
-            G, G_optim, os.path.join(checkpoint_dir, "G_{}.ckpt".format(max_n))
-        )
-        D, D_optim, start_step = load_model(
-            D, D_optim, os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n))
-        )
-        print("Epoch start: ", start_step)
+    elif args.use_custom_checkpoint == "number":
+
+        models = list(pathlib.Path(checkpoint_dir).glob("*.ckpt"))
+
+        # make this a list of its filename so like /x/y/x.ckpt should return x.ckpt
+
+        model_filenames = list(map(lambda x: x.name, models))
+
+        for filename in model_filenames:
+            try:
+                step = int(filename.split("_")[-1].split(".")[0])
+
+                max_n = max(max_n, step)
+            except ValueError:
+                pass
+
+        if max_n != -1:
+            G, G_optim, start_step = load_model(
+                G,
+                G_optim,
+                os.path.join(checkpoint_dir, "G_{}.ckpt".format(max_n)),
+            )
+            D, D_optim, start_step = load_model(
+                D,
+                D_optim,
+                os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n)),
+            )
+            print("Epoch start: ", start_step)
 
     # Define loss function
     criterion = nn.BCELoss()
@@ -207,7 +261,7 @@ def main(args):
         wandb.watch(criterion)
 
     best_g_loss = float("inf")
-    ########## Start Training ##########
+    # ########## Start Training ##########
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
             continue
@@ -300,6 +354,13 @@ def main(args):
                     step=epoch,
                     file_path=os.path.join(checkpoint_dir, "G_best_model.ckpt"),
                 )
+                save_model(
+                    model=D,
+                    optimizer=D_optim,
+                    step=epoch,
+                    file_path=os.path.join(checkpoint_dir, "D_best_model.ckpt"),
+                )
+
                 # Wandb to log data here
             if args.wandb == "true":
                 wandb.log(
@@ -334,6 +395,14 @@ def main(args):
                     step=epoch,
                     file_path=os.path.join(
                         checkpoint_dir, "G_{}.ckpt".format(epoch)
+                    ),
+                )
+                save_model(
+                    model=D,
+                    optimizer=D_optim,
+                    step=epoch,
+                    file_path=os.path.join(
+                        checkpoint_dir, "D_{}.ckpt".format(epoch)
                     ),
                 )
 
