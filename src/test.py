@@ -142,6 +142,14 @@ def main(args):
 
     action_map.get(args.type, lambda: None)()
 
+    print("Completed generating images for the given arguments:")
+    print("\n")
+    print(args)
+    print("\n")
+    print(
+        f"Please refer to folder : {args.sample_dir} to see the generated images."
+    )
+
 
 def run():
     parse = parse_args()
@@ -151,3 +159,7 @@ def run():
         print(key)
     print("Done")
     main(parse)
+
+
+if __name__ == "__main__":
+    run()

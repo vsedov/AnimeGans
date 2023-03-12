@@ -53,7 +53,7 @@ def parse_args():
         "-i",
         "--iterations",
         type=int,
-        default=5,
+        default=5000,
         help="Number of iterations to train Generator",
     )
     parser.add_argument(
@@ -91,8 +91,20 @@ def parse_args():
     )
 
     # Wandb parameters
+    parser.add_argument("--wandb", type=str, default="true", help="Use wandb")
+
     parser.add_argument(
-        "--wandb_project", type=str, default="core", help="Use wandb"
+        "--wandb_project", type=str, default="core", help="Use Project_scope"
+    )
+    parser.add_argument(
+        "--wandb_name", type=str, default="acgan", help="Use project_name"
+    )
+
+    parser.add_argument(
+        "--wandbp_tensorboard",
+        type=str,
+        default="false",
+        help="Use tensorboard Please refer to : https://docs.wandb.ai/guides/integrations/tensorboard",
     )
 
     return parser.parse_args()
@@ -100,7 +112,7 @@ def parse_args():
 
 def main(args):
     if args.wandb == "true":
-        wandb.init(project=args.wandb_project, entity="core")
+        wandb.init(project=args.wandb_project, name=args.wandb_name)
 
         wandb.config.update(
             {
@@ -286,6 +298,13 @@ def main(args):
                     sample_dir=fixed_attribute_dir,
                 )
 
+    if args.wandb == "true":
+        wandb.finish()
+
 
 def run():
     main(parse_args())
+
+
+if __name__ == "__main__":
+    run()
