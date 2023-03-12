@@ -14,12 +14,6 @@ Datasets that are used:
 - Actual Human Faces
 - Anime Faces
 
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/catppuccin/catppuccin/dev/assets/footers/gray0_ctp_on_line.svg?sanitize=true"
-  />
-</p>
-
 ### Cats and Dogs
 
 After around 300 epochs, the generator has learnt some degree of how a dog would look like, despite this not being realistic. As indicated in my initial project plan, this was something I wanted to avoid before beginning work on the anime face data.
@@ -32,12 +26,6 @@ Even though the pictures were distinct and there was limited mode collapse, ther
 These photos were likewise of various sizes and required proper compression.
 In addition, it seems that more data processing will be necessary, since there are some really poor photos that must be eliminated for this dataset to be viable.
 
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/catppuccin/catppuccin/dev/assets/footers/gray0_ctp_on_line.svg?sanitize=true"
-  />
-</p>
-
 ### Human Faces
 
 While Cats and Dogs is a poorly structured dataset, Human Faces yielded beneficial results and was trained over 1000 epochs and 3 days.
@@ -46,19 +34,7 @@ Comparing the cosine distance of the gradients allowed me to get a deeper knowle
 In addition, at the conclusion of the training, I discovered that the convergence for human faces had failed owing to the gradient ascent change shown in the dcgan study.
 To resolve this, I will need further time and network testing.
 
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/catppuccin/catppuccin/dev/assets/footers/gray0_ctp_on_line.svg?sanitize=true"
-  />
-</p>
-
 ### Anime Faces *Core part of project*
-
-<p align="center">
-  <img
-    src="https://raw.githubusercontent.com/catppuccin/catppuccin/dev/assets/footers/gray0_ctp_on_line.svg?sanitize=true"
-  />
-</p>
 
 ## How to run this project ?
 
