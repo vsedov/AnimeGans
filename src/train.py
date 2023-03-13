@@ -2,6 +2,10 @@
 # from src.core import hp
 
 
+# These are helper functions, if you want them imported in
+# from src.core import hp
+
+
 import os
 import pathlib
 
@@ -11,10 +15,10 @@ from argparse import ArgumentParser
 
 import torch
 import tqdm
+import wandb
 from torch import nn, optim
 from torchvision import utils as vutils
 
-import wandb
 from src.core import hc
 from src.create_data.create_local_dataset import train_loader
 from src.models.ACGAN import Discriminator, Generator
@@ -133,8 +137,7 @@ def parse_args():
         "-t",
         "--extra_train_model_type",
         type=str,
-        choices=["number", "best", "false"],
-        help="Use best model instead [number, best]",
+        help="Use best model instead [number:{}, best]",
     )
 
     return parser.parse_args()
@@ -207,21 +210,39 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
             os.path.join(checkpoint_dir, "D_best_model.ckpt"),
         )
 
-    elif args.extra_train_model_type == "number":
+    # elif args.extra_train_model_type == "number":
+    # Check if it_containsnumber
+    elif args.extra_train_model_type.startswith("number"):
+        splited_data = args.extra_train_model_type.split(":")
+        if len(splited_data) == 1:
 
-        models = list(pathlib.Path(checkpoint_dir).glob("*.ckpt"))
-        model_filenames = list(map(lambda x: x.name, models))
+            models = list(pathlib.Path(checkpoint_dir).glob("*.ckpt"))
+            model_filenames = list(map(lambda x: x.name, models))
 
-        for filename in model_filenames:
-            try:
-                step = int(filename.split("_")[-1].split(".")[0])
+            for filename in model_filenames:
+                try:
+                    step = int(filename.split("_")[-1].split(".")[0])
 
-                max_n = max(max_n, step)
-                print(max_n)
-            except ValueError:
-                pass
+                    max_n = max(max_n, step)
+                    print(max_n)
+                except ValueError:
+                    pass
 
-        if max_n != -1:
+            if max_n != -1:
+                G, G_optim, start_step = load_model(
+                    G,
+                    G_optim,
+                    os.path.join(checkpoint_dir, "G_{}.ckpt".format(max_n)),
+                )
+                D, D_optim, start_step = load_model(
+                    D,
+                    D_optim,
+                    os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n)),
+                )
+
+                print("Epoch start: ", start_step)
+        else:
+            max_n = splited_data[-1]
             G, G_optim, start_step = load_model(
                 G,
                 G_optim,
@@ -232,7 +253,7 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
                 D_optim,
                 os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n)),
             )
-            print("Epoch start: ", start_step)
+        print(splited_data)
 
     return G, G_optim, D, D_optim, start_step
 
@@ -307,7 +328,9 @@ def main(
     best_g_loss = float("inf")
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
-            print(f"Skiiping Epoch {epoch}")
+            print(
+                f"Skiiping Epoch {epoch} -> {epoch + 1} under iterations : {iterations}"
+            )
             continue
 
         for step_i, (real_img, hair_tags, eye_tags) in enumerate(
@@ -387,25 +410,16 @@ def main(
             print(
                 f"Epoch: {epoch + 1}/{iterations} Iteration: {step_i + 1}/{len(train_loader)} Loss D: {D_loss.item():.4f} Loss G: {G_loss.item():.4f}"
             )
+            print("\n")
 
             if G_loss.item() < best_g_loss:
                 best_g_loss = G_loss.item()
 
                 print(f"Saving Best Model {G_loss.item()} best loss ")
-                save_model(
-                    model=G,
-                    optimizer=G_optim,
-                    step=epoch,
-                    file_path=os.path.join(checkpoint_dir, "G_best_model.ckpt"),
-                )
-                save_model(
-                    model=D,
-                    optimizer=D_optim,
-                    step=epoch,
-                    file_path=os.path.join(checkpoint_dir, "D_best_model.ckpt"),
+                save_both(
+                    G, D, G_optim, D_optim, checkpoint_dir, epoch, is_best=True
                 )
 
-                # Wandb to log data here
             if args.wandb == "true":
                 wandb.log(
                     {
