@@ -361,7 +361,7 @@ def main(
             # Reshale all values to batch_size now
 
             for x in [real_score, real_hair_predict, real_eye_predict]:
-                log.log(x.shape)
+                log.log(5, x.shape)
 
             real_discrim_loss = criterion(real_score, soft_label)
             fake_discrim_loss = criterion(fake_score, fake_label)
