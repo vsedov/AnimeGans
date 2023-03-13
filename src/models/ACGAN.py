@@ -130,10 +130,10 @@ class Generator(nn.Module):
         """
         concat = torch.cat(
             (noise, _class), dim=1
-        )  # Concatenate noise and class vector.
+        )
         concat = concat.unsqueeze(2).unsqueeze(
             3
-        )  # Reshape the latent vector into a feature map.
+        )  
         return self.gen(concat)
 
 

@@ -120,14 +120,30 @@ def get_random_label(batch_size, hair_classes, eye_classes):
     Returns:
         torch.Tensor: A tensor of size (batch_size, hair_classes + eye_classes) representing the one-hot encoded class labels.
     """
-    hair_code = torch.zeros(batch_size, hair_classes)
-    eye_code = torch.zeros(batch_size, eye_classes)
+    hair_code = torch.zeros(
+        batch_size, hair_classes
+    )  # One hot encoding for hair class
+    eye_code = torch.zeros(
+        batch_size, eye_classes
+    )  # One hot encoding for eye class
 
-    hair_type = torch.randint(0, hair_classes, (batch_size,))
-    eye_type = torch.randint(0, eye_classes, (batch_size,))
+    if use_numpy:
+        hair_type = np.random.choice(
+            hair_classes, batch_size
+        )  # Sample hair class from hair class prior
+        eye_type = np.random.choice(
+            eye_classes, batch_size
+        )  # Sample eye class from eye class prior
 
-    hair_code[range(batch_size), hair_type] = 1
-    eye_code[range(batch_size), eye_type] = 1
+        for i in range(batch_size):
+            hair_code[i][hair_type[i]] = 1
+            eye_code[i][eye_type[i]] = 1
+    else:
+        hair_type = torch.randint(0, hair_classes, (batch_size,))
+        eye_type = torch.randint(0, eye_classes, (batch_size,))
+
+        hair_code[range(batch_size), hair_type] = 1
+        eye_code[range(batch_size), eye_type] = 1
 
     return torch.cat((hair_code, eye_code), dim=1)
 
