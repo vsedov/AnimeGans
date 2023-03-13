@@ -1,3 +1,7 @@
+# These are helper functions, if you want them imported in
+# from src.core import hp
+
+
 import os
 import pathlib
 
@@ -19,6 +23,7 @@ from src.utils.torch_utils import *
 # These are helper functions, if you want them imported in
 # from src.core import hp
 
+DEVICE = torch.device(hc.DEFAULT_DEVICE)
 
 hair = [
     "orange",
@@ -119,89 +124,63 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--wandb_tensorboard",
-        type=str,
-        default="true",
-        help="Use tensorboard Please refer to : https://docs.wandb.ai/guides/integrations/tensorboard",
-    )
-
-    parser.add_argument(
         "--overwrite",
         type=str,
         help="Path overwrite, such that if you wish to use this : Batchsize:epoch_ammount is required for given directory 64:120",
     )
 
     parser.add_argument(
-        "--use_custom_checkpoint",
+        "-t",
+        "--extra_train_model_type",
         type=str,
-        default="false",
+        choices=["number", "best", "false"],
         help="Use best model instead [number, best]",
     )
 
     return parser.parse_args()
 
 
-def main(args):
-    if args.wandb == "true":
-        wandb.init(project=args.wandb_project, name=args.wandb_name)
-        wandb.config.update(
-            {
-                "batch_size": args.batch_size,
-                "iterations": args.iterations,
-                "lr": args.lr,
-                "beta": args.beta,
-                "sample_dir": args.sample_dir,
-                "checkpoint_dir": args.checkpoint_dir,
-                "sample": args.sample,
-                "hair_classes": len(hair),
-                "eye_classes": len(eyes),
-            }
-        )
-
-    device = torch.device(hc.DEFAULT_DEVICE)
-
-    # Define configuration
-    batch_size = args.batch_size
-    iterations = args.iterations
-    hair_classes, eye_classes = len(hair), len(eyes)
-    num_classes = hair_classes + eye_classes
-    latent_dim = 128
-    smooth = 0.9
-
-    if args.overwrite:
-        x, y = args.overwrite.split(":")
-        config = "ACGAN-[{}]-[{}]".format(x, y)
-    else:
-        config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
-
-    print(config)
-    # Create directories
-    random_sample_dir = os.path.join(
-        args.sample_dir, config, "random_generation"
+def save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch, is_best=False):
+    suffix = "" if is_best else str(epoch)
+    save_model(
+        model=G,
+        optimizer=G_optim,
+        step=epoch,
+        file_path=os.path.join(
+            checkpoint_dir,
+            "G_{}{}.ckpt".format("best_" if is_best else "", suffix),
+        ),
     )
-    fixed_attribute_dir = os.path.join(
-        args.sample_dir, config, "fixed_attributes"
+    save_model(
+        model=D,
+        optimizer=D_optim,
+        step=epoch,
+        file_path=os.path.join(
+            checkpoint_dir,
+            "D_{}{}.ckpt".format("best_" if is_best else "", suffix),
+        ),
     )
-    checkpoint_dir = os.path.join(args.checkpoint_dir, config)
 
-    if not os.path.exists(random_sample_dir):
-        os.makedirs(random_sample_dir)
-    if not os.path.exists(fixed_attribute_dir):
-        os.makedirs(fixed_attribute_dir)
-    if not os.path.exists(checkpoint_dir):
-        os.makedirs(checkpoint_dir)
 
-    # Initialize models and optimizers
+def create_directories(directories):
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+
+def initialize_models_and_optimizers(
+    args, hair_classes, eye_classes, latent_dim, num_classes
+):
     G = Generator(
         latent_dim=latent_dim,
         class_dim=num_classes,
         extra_layers=args.extra_generator_layers,
-    ).to(device)
+    ).to(DEVICE)
     D = Discriminator(
         hair_classes=hair_classes,
         eye_classes=eye_classes,
         extra_layers=args.extra_discriminator_layers,
-    ).to(device)
+    ).to(DEVICE)
 
     if args.wandb == "true":
         wandb.watch(G)
@@ -210,10 +189,13 @@ def main(args):
     G_optim = optim.Adam(G.parameters(), betas=[args.beta, 0.999], lr=args.lr)
     D_optim = optim.Adam(D.parameters(), betas=[args.beta, 0.999], lr=args.lr)
 
-    # Load checkpoint if it exists
+    return G, G_optim, D, D_optim
+
+
+def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
     start_step = 0
     max_n = -1
-    if args.use_custom_checkpoint == "best":
+    if args.extra_train_model_type == "best":
         G, G_optim, D, D_optim, start_step, max_n = load_model(
             G,
             G_optim,
@@ -225,12 +207,9 @@ def main(args):
             os.path.join(checkpoint_dir, "D_best_model.ckpt"),
         )
 
-    elif args.use_custom_checkpoint == "number":
+    elif args.extra_train_model_type == "number":
 
         models = list(pathlib.Path(checkpoint_dir).glob("*.ckpt"))
-
-        # make this a list of its filename so like /x/y/x.ckpt should return x.ckpt
-
         model_filenames = list(map(lambda x: x.name, models))
 
         for filename in model_filenames:
@@ -238,6 +217,7 @@ def main(args):
                 step = int(filename.split("_")[-1].split(".")[0])
 
                 max_n = max(max_n, step)
+                print(max_n)
             except ValueError:
                 pass
 
@@ -254,38 +234,102 @@ def main(args):
             )
             print("Epoch start: ", start_step)
 
+    return G, G_optim, D, D_optim, start_step
+
+
+def main(
+    args,
+):
+    # Define configuration batch_size = args.batch_size iterations = args.iterations hair_classes, eye_classes = len(hair), len(eyes) num_classes = hair_classes + eye_classes latent_dim = 128 smooth = 0.9
+
+    if args.wandb == "true":
+        wandb.init(project=args.wandb_project, name=args.wandb_name)
+        wandb.config.update(
+            {
+                "batch_size": args.batch_size,
+                "iterations": args.iterations,
+                "lr": args.lr,
+                "beta": args.beta,
+                "sample_dir": args.sample_dir,
+                "checkpoint_dir": args.checkpoint_dir,
+                "sample": args.sample,
+                "hair_classes": len(hair),
+                "eye_classes": len(eyes),
+            }
+        )
+
+    # Define configuration
+    batch_size = args.batch_size
+    iterations = args.iterations
+    hair_classes, eye_classes = len(hair), len(eyes)
+    num_classes = hair_classes + eye_classes
+    latent_dim = 128
+    smooth = 0.9
+
+    if args.overwrite:
+        x, y = args.overwrite.split(":")
+        config = "ACGAN-[{}]-[{}]".format(x, y)
+    else:
+        config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
+
+    # Create directories
+    random_sample_dir = os.path.join(
+        args.sample_dir, config, "random_generation"
+    )
+    fixed_attribute_dir = os.path.join(
+        args.sample_dir, config, "fixed_attributes"
+    )
+    checkpoint_dir = os.path.join(args.checkpoint_dir, config)
+
+    directories = [random_sample_dir, fixed_attribute_dir, checkpoint_dir]
+    create_directories(directories)
+
+    # Initialize models and optimizers
+    G, G_optim, D, D_optim = initialize_models_and_optimizers(
+        args, hair_classes, eye_classes, latent_dim, num_classes
+    )
+
+    # Load checkpoint if it exists
+    G, G_optim, D, D_optim, start_step = load_checkpoint(
+        args, checkpoint_dir, G, G_optim, D, D_optim
+    )
+
     # Define loss function
     criterion = nn.BCELoss()
 
     if args.wandb == "true":
         wandb.watch(criterion)
 
+    #  ╭────────────────────────────────────────────────────────────────────╮
+    #  │     start Training                                                 │
+    #  ╰────────────────────────────────────────────────────────────────────╯
+
     best_g_loss = float("inf")
-    # ########## Start Training ##########
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
+            print(f"Skiiping Epoch {epoch}")
             continue
 
         for step_i, (real_img, hair_tags, eye_tags) in enumerate(
             tqdm.tqdm(train_loader, desc="Inner Epoch Loop")
         ):
-            real_label = torch.ones(batch_size, device=device)
-            fake_label = torch.zeros(batch_size, device=device)
-            soft_label = torch.Tensor(batch_size).uniform_(smooth, 1).to(device)
+            real_label = torch.ones(batch_size, device=DEVICE)
+            fake_label = torch.zeros(batch_size, device=DEVICE)
+            soft_label = torch.Tensor(batch_size).uniform_(smooth, 1).to(DEVICE)
             real_img, hair_tags, eye_tags = (
-                real_img.to(device),
-                hair_tags.to(device),
-                eye_tags.to(device),
+                real_img.to(DEVICE),
+                hair_tags.to(DEVICE),
+                eye_tags.to(DEVICE),
             )
 
             # Train discriminator
-            z = torch.randn(batch_size, latent_dim, device=device)
+            z = torch.randn(batch_size, latent_dim, device=DEVICE)
             fake_tag = get_random_label(
                 batch_size=batch_size,
                 hair_classes=hair_classes,
                 eye_classes=eye_classes,
-            ).to(device)
-            fake_img = G(z, fake_tag).to(device)
+            ).to(DEVICE)
+            fake_img = G(z, fake_tag).to(DEVICE)
 
             real_score, real_hair_predict, real_eye_predict = D(real_img)
             fake_score, _, _ = D(fake_img)
@@ -317,16 +361,16 @@ def main(args):
                 )
 
             # Train generator
-            z = torch.randn(batch_size, latent_dim, device=device)
+            z = torch.randn(batch_size, latent_dim, device=DEVICE)
             fake_tag = get_random_label(
                 batch_size=batch_size,
                 hair_classes=hair_classes,
                 eye_classes=eye_classes,
-            ).to(device)
+            ).to(DEVICE)
 
             hair_tag = fake_tag[:, 0:hair_classes]
             eye_tag = fake_tag[:, hair_classes:]
-            fake_img = G(z, fake_tag).to(device)
+            fake_img = G(z, fake_tag).to(DEVICE)
 
             fake_score, hair_predict, eye_predict = D(fake_img)
             discrim_loss = criterion(fake_score, real_label)
@@ -389,26 +433,10 @@ def main(args):
                 )
 
             if step_i == 0:
-                save_model(
-                    model=G,
-                    optimizer=G_optim,
-                    step=epoch,
-                    file_path=os.path.join(
-                        checkpoint_dir, "G_{}.ckpt".format(epoch)
-                    ),
-                )
-                save_model(
-                    model=D,
-                    optimizer=D_optim,
-                    step=epoch,
-                    file_path=os.path.join(
-                        checkpoint_dir, "D_{}.ckpt".format(epoch)
-                    ),
-                )
-
+                save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch)
                 generate_by_attributes(
                     model=G,
-                    device=device,
+                    device=DEVICE,
                     step=epoch,
                     latent_dim=latent_dim,
                     hair_classes=hair_classes,
