@@ -1,8 +1,8 @@
 import argparse
-import glob
-import os
+from pathlib import Path
 
-import imageio
+from imageio import v2 as imageio
+from tqdm import tqdm
 
 from src.core import hc
 
@@ -22,10 +22,16 @@ parser.add_argument(
 parser.add_argument(
     "--max_frames", type=int, default=1, help="Max number of frames in the gif"
 )
+parser.add_argument(
+    "--step", type=int, default=5, help="Step between frames in the gif"
+)
 args = parser.parse_args()
 
-filenames = sorted(glob.glob(os.path.join(args.img_dir, "*.jpg")))
-step = len(filenames) // args.max_frames if args.max_frames else 1
-images = (imageio.imread(filename) for filename in filenames[::step])
 
-imageio.mimsave(args.save_path, images, fps=8)
+with imageio.get_writer(args.save_path, mode="I", fps=8) as writer:
+    filenames = sorted(Path(args.img_dir).glob("*.png"))
+    filenames = [str(f) for f in filenames]
+    print(len(filenames))
+
+    for filename in tqdm(filenames[:: args.step]):
+        writer.append_data(imageio.imread(filename))
