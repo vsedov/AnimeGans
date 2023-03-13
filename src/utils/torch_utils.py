@@ -109,7 +109,7 @@ def load_model(model, optimizer, file_path):
     return model, optimizer, start_step
 
 
-def get_random_label(batch_size, hair_classes, eye_classes):
+def get_random_label(batch_size, hair_classes, eye_classes, use_numpy=True):
     """Sample a batch of random class labels for hair and eye color.
 
     Args:
