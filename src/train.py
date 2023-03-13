@@ -362,10 +362,18 @@ def main(
 
             for x in [real_score, real_hair_predict, real_eye_predict]:
                 log.log(5, x.shape)
+            #  ╭────────────────────────────────────────────────────────────────────╮
+            #  │                                                                    │
+            #  │             THERE IS AN ERROR HERE< ONCE THE HAIR AND EYE AUX      │
+            #  │  LOSS DROPS MODEL BLOWS UP                                         │
+            #  │                                                                    │
+            #  ╰────────────────────────────────────────────────────────────────────╯
 
             real_discrim_loss = criterion(real_score, soft_label)
             fake_discrim_loss = criterion(fake_score, fake_label)
 
+            #  REVISIT: (vsedov) (16:41:06 - 13/03/23): Fix mode collapse issue
+            #  with respect to eye loss
             real_hair_aux_loss = criterion(real_hair_predict, hair_tags)
             real_eye_aux_loss = criterion(real_eye_predict, eye_tags)
             real_classifier_loss = real_hair_aux_loss + real_eye_aux_loss
