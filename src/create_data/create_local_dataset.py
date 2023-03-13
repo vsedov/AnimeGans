@@ -1,8 +1,10 @@
 import os
 
+import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
@@ -81,34 +83,79 @@ def get_dataloader(dataset, batch_size, num_workers, shuffle, drop_last):
 def validate_data_loader(train_loader):
 
     for step, (real, ahir, eye) in enumerate(train_loader):
-        print(f" {step} {real.shape} {ahir.shape} {eye.shape}")
+        # Get the hair color and eye color for each image
+        hair_color = np.argmax(ahir.numpy(), axis=1)
+        eye_color = np.argmax(eye.numpy(), axis=1)
+        hair_colors = [
+            "orange",
+            "white",
+            "aqua",
+            "gray",
+            "green",
+            "red",
+            "purple",
+            "pink",
+            "blue",
+            "black",
+            "brown",
+            "blonde",
+        ]
+        eye_colors = [
+            "gray",
+            "black",
+            "orange",
+            "pink",
+            "yellow",
+            "aqua",
+            "purple",
+            "green",
+            "brown",
+            "red",
+            "blue",
+        ]
+        # Plot the first 10 images
+        fig = plt.figure(figsize=(5, 5))
+        for i in range(10):
+            ax = fig.add_subplot(5, 5, i + 1)
+            ax.imshow(np.array(real[i].permute(1, 2, 0)))
+            ax.axis("off")
+            ax.set_title(
+                f"Hair: {hair_colors[hair_color[i]]}, Eye: {eye_colors[eye_color[i]]}"
+            )
 
-        if step == 10:
-            break
+        plt.tight_layout()
+        plt.show()
+        break
 
 
-path_data = f"{hc.DIR}/data/"
+def generate_dataset():
+    path_data = f"{hc.DIR}/data/"
+    transform_anime = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        ]
+    )
+    return get_dataset(
+        f"{hc.DIR}/create_data/features.csv", path_data, transform_anime
+    )
 
-transform_anime = transforms.Compose(
-    [
-        transforms.ToTensor(),
-        # better results if you had normalized this data instead?
-        # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-    ]
-)
 
-
-generated_dataset = get_dataset(
-    f"{hc.DIR}/create_data/features.csv", path_data, transform_anime
-)
-
-train_loader = get_dataloader(
-    generated_dataset,
+def generate_train_loader(
+    generated_dataset=generate_dataset(),
     batch_size=64,
     num_workers=16,
     shuffle=True,
     drop_last=True,
-)
+):
+    return get_dataloader(
+        generated_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        shuffle=shuffle,
+        drop_last=drop_last,
+    )
+
 
 if __name__ == "__main__":
-    validate_data_loader(train_loader)
+    validate_data_loader(generate_train_loader())

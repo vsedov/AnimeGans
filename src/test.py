@@ -4,11 +4,9 @@ from collections import namedtuple
 
 import torch
 
+from src.core import hc
 from src.models.ACGAN import Generator
 from src.utils.torch_utils import *
-from src.utils.utils import current_path
-
-current_path = current_path()
 
 
 def parse_args():
@@ -58,20 +56,20 @@ def parse_args():
         "-s",
         "--sample_dir",
         help="Folder to save the generated samples.",
-        default=f"{current_path}/results/generated",
+        default=f"{hc.DIR}results/generated",
         type=str,
     )
     parser.add_argument(
         "-b",
         "--batch_size",
-        help="Batch size used during training.",
+        help="Batch size used during training (Why) : Because you May retrain your dataset on a previous model, if you do something where you train on epoch 100, and then you retrain on that data on epoch 200, in this instance you would have to refer to  its respected batch",
         default=64,
         type=int,
     )
     parser.add_argument(
         "-e",
         "--epoch",
-        help="Number of epochs used during training.",
+        help="Number of epochs used during training., if previous models are used, please refer to a given batch number that you would default to train with. ",
         default=5,
         type=int,
     )
@@ -84,6 +82,78 @@ def parse_args():
     )
 
     args = parser.parse_args()
-    args.gen_model_dir = f"{current_path}/results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
+    args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
+
     return Args(*args.__dict__.values())
 
+
+def main(args):
+    """
+    Main function.
+
+    Args:
+        args: Arguments.
+
+    Notes:
+        - The function will generate anime characters based on the given arguments.
+        Generated samples will be saved in the folder specified by the argument `sample_dir`.
+        - The function will generate anime characters based on the given arguments.
+
+    Returns:
+        None
+
+    """
+    os.makedirs(args.sample_dir, exist_ok=True)
+    device = hc.DEFAULT_DEVICE
+    latent_dim = 128
+    hair_classes = len(hair_mapping)
+    eye_classes = len(eye_mapping)
+
+    G = Generator(latent_dim, hair_classes + eye_classes).to(device)
+    prev_state = torch.load(args.gen_model_dir)
+    G.load_state_dict(prev_state["model"])
+    G = G.eval()
+
+    action_map = {
+        "fix_hair_eye": lambda: generate_by_attributes(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir,
+            hair_color=args.hair,
+            eye_color=args.eye,
+        ),
+        "change_eye": lambda: eye_grad(
+            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
+        ),
+        "change_hair": lambda: hair_grad(
+            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
+        ),
+        "interpolate": lambda: interpolate(
+            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
+        ),
+        "fix_noise": lambda: fix_noise(
+            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
+        ),
+    }
+
+    action_map.get(args.type, lambda: None)()
+
+    print("Completed generating images for the given arguments:")
+    print("\n")
+    print(args)
+    print("\n")
+    print(
+        f"Please refer to folder : {args.sample_dir} to see the generated images."
+    )
+
+
+def run():
+    parse = parse_args()
+    main(parse)
+
+
+if __name__ == "__main__":
+    run()
