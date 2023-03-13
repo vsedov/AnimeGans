@@ -211,7 +211,7 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
 
     # elif args.extra_train_model_type == "number":
     # Check if it_containsnumber
-    elif x := (args.extra_train_model_type) is not None and x.startswith(
+    elif (x := args.extra_train_model_type) is not None and x.startswith(
         "number"
     ):
         splited_data = args.extra_train_model_type.split(":")
@@ -361,11 +361,19 @@ def main(
             # Reshale all values to batch_size now
 
             for x in [real_score, real_hair_predict, real_eye_predict]:
-                log.log(x.shape)
+                log.log(5, x.shape)
+            #  ╭────────────────────────────────────────────────────────────────────╮
+            #  │                                                                    │
+            #  │             THERE IS AN ERROR HERE< ONCE THE HAIR AND EYE AUX      │
+            #  │  LOSS DROPS MODEL BLOWS UP                                         │
+            #  │                                                                    │
+            #  ╰────────────────────────────────────────────────────────────────────╯
 
             real_discrim_loss = criterion(real_score, soft_label)
             fake_discrim_loss = criterion(fake_score, fake_label)
 
+            #  REVISIT: (vsedov) (16:41:06 - 13/03/23): Fix mode collapse issue
+            #  with respect to eye loss
             real_hair_aux_loss = criterion(real_hair_predict, hair_tags)
             real_eye_aux_loss = criterion(real_eye_predict, eye_tags)
             real_classifier_loss = real_hair_aux_loss + real_eye_aux_loss
