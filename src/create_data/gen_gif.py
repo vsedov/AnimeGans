@@ -4,17 +4,19 @@ import os
 
 import imageio
 
+from src.core import hc
+
 parser = argparse.ArgumentParser(
     description="Create a gif from a directory of images"
 )
 parser.add_argument(
     "--save_path",
-    default="../../results/anime.gif",
+    default=f"{hc.DIR}results/anime.gif",
     help="Path to save the gif",
 )
 parser.add_argument(
     "--img_dir",
-    default="../../results/",
+    default=f"{hc.DIR}/results/",
     help="Directory containing the images",
 )
 parser.add_argument(
