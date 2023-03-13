@@ -62,14 +62,14 @@ def parse_args():
     parser.add_argument(
         "-b",
         "--batch_size",
-        help="Batch size used during training.",
+        help="Batch size used during training (Why) : Because you May retrain your dataset on a previous model, if you do something where you train on epoch 100, and then you retrain on that data on epoch 200, in this instance you would have to refer to  its respected batch",
         default=64,
         type=int,
     )
     parser.add_argument(
         "-e",
         "--epoch",
-        help="Number of epochs used during training.",
+        help="Number of epochs used during training., if previous models are used, please refer to a given batch number that you would default to train with. ",
         default=5,
         type=int,
     )
@@ -104,7 +104,7 @@ def main(args):
 
     """
     os.makedirs(args.sample_dir, exist_ok=True)
-    device = "cpu" if not torch.cuda.is_available() else "cuda"
+    device = hc.DEFAULT_DEVICE
     latent_dim = 128
     hair_classes = len(hair_mapping)
     eye_classes = len(eye_mapping)
@@ -152,11 +152,6 @@ def main(args):
 
 def run():
     parse = parse_args()
-    print("Help")
-    data = parse
-    for key in data._fields:
-        print(key)
-    print("Done")
     main(parse)
 
 
