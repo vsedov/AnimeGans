@@ -122,33 +122,40 @@ def validate_data_loader(train_loader):
             ax.set_title(
                 f"Hair: {hair_colors[hair_color[i]]}, Eye: {eye_colors[eye_color[i]]}"
             )
+
         plt.tight_layout()
         plt.show()
         break
 
 
-path_data = f"{hc.DIR}/data/"
+def generate_dataset():
+    path_data = f"{hc.DIR}/data/"
+    transform_anime = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        ]
+    )
+    return get_dataset(
+        f"{hc.DIR}/create_data/features.csv", path_data, transform_anime
+    )
 
-transform_anime = transforms.Compose(
-    [
-        transforms.ToTensor(),
-        # better results if you had normalized this data instead?
-        # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-    ]
-)
 
-
-generated_dataset = get_dataset(
-    f"{hc.DIR}/create_data/features.csv", path_data, transform_anime
-)
-
-train_loader = get_dataloader(
-    generated_dataset,
+def generate_train_loader(
+    generated_dataset=generate_dataset(),
     batch_size=64,
     num_workers=16,
     shuffle=True,
     drop_last=True,
-)
+):
+    return get_dataloader(
+        generated_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        shuffle=shuffle,
+        drop_last=drop_last,
+    )
+
 
 if __name__ == "__main__":
-    validate_data_loader(train_loader)
+    validate_data_loader(generate_train_loader())
