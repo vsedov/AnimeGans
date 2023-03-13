@@ -8,19 +8,17 @@
 
 import os
 import pathlib
-
-# These are helper functions, if you want them imported in
-# from src.core import hp
 from argparse import ArgumentParser
 
+import loguru
 import torch
 import tqdm
-import wandb
 from torch import nn, optim
 from torchvision import utils as vutils
 
+import wandb
 from src.core import hc
-from src.create_data.create_local_dataset import train_loader
+from src.create_data.create_local_dataset import generate_train_loader
 from src.models.ACGAN import Discriminator, Generator
 from src.utils.torch_utils import *
 
@@ -28,6 +26,7 @@ from src.utils.torch_utils import *
 # from src.core import hp
 
 DEVICE = torch.device(hc.DEFAULT_DEVICE)
+log = loguru.logger
 
 hair = [
     "orange",
@@ -212,7 +211,9 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
 
     # elif args.extra_train_model_type == "number":
     # Check if it_containsnumber
-    elif args.extra_train_model_type.startswith("number"):
+    elif x := (args.extra_train_model_type) is not None and x.startswith(
+        "number"
+    ):
         splited_data = args.extra_train_model_type.split(":")
         if len(splited_data) == 1:
 
@@ -326,6 +327,7 @@ def main(
     #  ╰────────────────────────────────────────────────────────────────────╯
 
     best_g_loss = float("inf")
+    train_loader = generate_train_loader(batch_size=batch_size)
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
             print(
@@ -356,6 +358,10 @@ def main(
 
             real_score, real_hair_predict, real_eye_predict = D(real_img)
             fake_score, _, _ = D(fake_img)
+            # Reshale all values to batch_size now
+
+            for x in [real_score, real_hair_predict, real_eye_predict]:
+                log.log(x.shape)
 
             real_discrim_loss = criterion(real_score, soft_label)
             fake_discrim_loss = criterion(fake_score, fake_label)
