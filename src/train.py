@@ -81,6 +81,13 @@ def parse_args():
         default=0,
         help="Number of extra layers to train Discriminator",
     )
+    parser.add_argument(
+        "-C",
+        "--check_point_save_split ",
+        type=str,
+        default="",
+        help="Add a checkpoint split, Number of epochs you want to save your models",
+    )
 
     parser.add_argument(
         "-b", "--batch_size", type=int, default=64, help="Training batch size"
@@ -460,7 +467,10 @@ def main(
                     ),
                 )
 
-            if step_i == 0:
+            if (step_i == 0 and args.check_point_save_split == "") or (
+                args.check_point_save_split != ""
+                and step_i % args.check_point_save_split == 0
+            ):
                 save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch)
                 generate_by_attributes(
                     model=G,
