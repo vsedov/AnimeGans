@@ -133,7 +133,7 @@ def generate_dataset():
     transform_anime = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         ]
     )
     return get_dataset(
