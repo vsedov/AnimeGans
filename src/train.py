@@ -22,9 +22,6 @@ from src.create_data.create_local_dataset import generate_train_loader
 from src.models.ACGAN import Discriminator, Generator
 from src.utils.torch_utils import *
 
-# You can use the directml backend, if you wish
-# torch.backends.directml.enabled = True
-
 # These are helper functions, if you want them imported in
 # from src.core import hp
 
@@ -470,11 +467,12 @@ def main(
                     ),
                 )
 
-            if (step_i == 0 and args.check_point_save_split == 0) or (
-                args.check_point_save_split != 0
-                and (epoch % args.check_point_save_split == 0 and step_i == 0)
-            ):
-
+            # if (step_i == 0 and args.check_point_save_split == 0) or (
+            #     args.check_point_save_split != 0
+            #     and epoch % args.check_point_save_split == 0
+            #     and step_i == 0
+            # ):
+            if epoch % 100 == 0 and step_i == 0:
                 save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch)
 
             generate_by_attributes(
