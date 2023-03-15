@@ -1,0 +1,106 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Define Article %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Using Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{empheq}
+\usepackage{mdframed}
+\usepackage{booktabs}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{psfrag}
+\usepackage{pgfplots}
+\usepackage{bm}
+\usepackage{listings}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Other Settings
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Page Setting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\geometry{a4paper}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Define some useful colors %%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{ocre}{RGB}{243,102,25}
+\definecolor{mygray}{RGB}{243,243,244}
+\definecolor{deepGreen}{RGB}{26,111,0}
+\definecolor{shallowGreen}{RGB}{235,255,255}
+\definecolor{deepBlue}{RGB}{61,124,222}
+\definecolor{shallowBlue}{RGB}{235,249,255}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Define an orangebox command %%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\orangebox[1]{\fcolorbox{ocre}{mygray}{\hspace{1em}#1\hspace{1em}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% English Environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheoremstyle{mytheoremstyle}{3pt}{3pt}{\normalfont}{0cm}{\rmfamily\bfseries}{}{1em}{{\color{black}\thmname{#1}~\thmnumber{#2}}\thmnote{\,--\,#3}}
+\newtheoremstyle{myproblemstyle}{3pt}{3pt}{\normalfont}{0cm}{\rmfamily\bfseries}{}{1em}{{\color{black}\thmname{#1}~\thmnumber{#2}}\thmnote{\,--\,#3}}
+\theoremstyle{mytheoremstyle}
+\newmdtheoremenv[linewidth=1pt,backgroundcolor=shallowGreen,linecolor=deepGreen,leftmargin=0pt,innerleftmargin=20pt,innerrightmargin=20pt,]{theorem}{Theorem}[section]
+\theoremstyle{mytheoremstyle}
+\newmdtheoremenv[linewidth=1pt,backgroundcolor=shallowBlue,linecolor=deepBlue,leftmargin=0pt,innerleftmargin=20pt,innerrightmargin=20pt,]{definition}{Definition}[section]
+\theoremstyle{myproblemstyle}
+\newmdtheoremenv[linecolor=black,leftmargin=0pt,innerleftmargin=10pt,innerrightmargin=10pt,]{problem}{Problem}[section]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepgfplotslibrary{colorbrewer}
+\pgfplotsset{width=8cm,compat=1.9}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Title & Author %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Observations}
+\author{Vivian Sedov}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+    \maketitle
+    \tableofcontents
+
+    \section{Input Parser}
+    \paragraph{Issue}: Generator collapses and mode collapse occurs when the auxiliary loss for both hair and eye drops suddenly.
+
+    \paragraph{Explanation}: The auxiliary loss is acting as a regularizer for the generator, ensuring that it produces realistic images that also match the specified attributes (hair and eye color). When the auxiliary loss drops suddenly, it means that the generator is no longer being regularized properly, and as a result, it may start producing images that are only realistic but do not match the specified attributes, leading to mode collapse.
+
+    \paragraph{Solution}:
+
+    \begin{itemize}
+      \item Increase regularization strength: One way to prevent sudden drops in the auxiliary loss is to increase the strength of the regularization used in the loss function. This can be achieved by increasing the weight of the auxiliary loss term or introducing additional constraints on the generator.
+      \item Add noise to the latent code: Adding noise to the latent code can help regularize the generator and prevent mode collapse. This can be achieved by introducing random perturbations to the input vector z at each training iteration.
+      \item Use different loss functions: Another approach could be to use a different loss function that penalizes the generator for producing images that do not match the specified attributes. For example, one could use a Wasserstein distance-based loss that penalizes the difference between the generated and real data distributions.
+      \item Monitor auxiliary loss during training: Monitoring the auxiliary loss during training and adjusting the regularization strength accordingly can help prevent sudden drops. This can involve setting up early stopping criteria that trigger when the loss drops below a certain threshold or using adaptive regularization techniques that adjust the regularization strength based on the loss value.
+      \item Use adversarial training: Adversarial training is a technique that involves training the generator and discriminator in an alternating fashion. This can help stabilize the training process and prevent mode collapse by encouraging the generator to produce more diverse images.
+    \end{itemize}
+
+    \paragraph{Implications}: This is a common issue in auxiliary generative adversarial networks, and understanding its underlying causes and solutions can help improve the performance and stability of such networks.
+
+    \subsubsection{Why is this occouring}
+In the auxiliary generative adversarial network (GAN) framework, the generator is trained to produce images that not only look realistic but also match certain attributes (in this case, hair and eye color). The auxiliary loss function helps achieve this by penalizing the generator for producing images that do not match the specified attributes. Specifically, the hair auxiliary loss and eye auxiliary loss terms measure the difference between the predicted and true hair and eye color labels, respectively.
+
+When the hair and eye auxiliary losses drop suddenly, it means that the generator is no longer being penalized sufficiently for producing images that do not match the specified attributes. This can cause the generator to produce images that look realistic but have incorrect hair and eye colors, leading to mode collapse.
+
+One way to address this issue is to add an extra discriminator layer that specifically targets the attribute labels (i.e., hair and eye color). This can help provide stronger feedback to the generator on whether the generated images match the specified attributes or not. By adding this extra layer, the discriminator can learn to distinguish between images that not only look realistic but also have the correct hair and eye colors.
+
+Here is some example code where the hair and eye auxiliary losses are being calculated:
+
+\begin{lstlisting}[language=Python]
+real_hair_aux_loss = criterion(real_hair_predict, hair_tags)
+real_eye_aux_loss = criterion(real_eye_predict, eye_tags)
+real_classifier_loss = real_hair_aux_loss + real_eye_aux_loss
+\end{lstlisting}
+
+
+In the above code snippet, real\_hair\_predict and real\_eye\_predict are the predicted hair and eye color labels for the real images, respectively, and hair\_tags and eye\_tags are the true hair and eye color labels, respectively. The auxiliary losses (real\_hair\_aux\_loss and real\_eye\_aux\_loss) are calculated by comparing the predicted labels with the true labels using the binary cross-entropy loss function (criterion).
+
+
+Mathematically, adding an extra discriminator layer can be seen as introducing an additional term in the objective function that encourages the generator to produce images that match the specified attributes. The discriminator tries to minimize this term by correctly classifying the attribute labels, while the generator tries to maximize it by producing images that fool the discriminator into thinking they have the correct attribute labels. This results in a more robust and stable training process that helps prevent mode collapse.
+
+In summary, sudden drops in the hair and eye auxiliary losses can lead to generator collapse, and adding an extra discriminator layer that specifically targets the attribute labels can help address this issue by providing stronger feedback to the generator on whether the generated images match the specified attributes or not.
+
+\end{document}

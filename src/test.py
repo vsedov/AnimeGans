@@ -18,6 +18,7 @@ def parse_args():
             "eye",
             "sample_dir",
             "batch_size",
+            "extra_generator_layers",
             "epoch",
             "check_point_number",
             "gen_model_dir",
@@ -80,6 +81,12 @@ def parse_args():
         default=4,
         type=int,
     )
+    parser.add_argument(
+        "--extra_generator_layers",
+        help="Add extra layers to the generator.",
+        default=1,
+        type=int,
+    )
 
     args = parser.parse_args()
     args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
@@ -104,14 +111,19 @@ def main(args):
 
     """
     os.makedirs(args.sample_dir, exist_ok=True)
-    device = hc.DEFAULT_DEVICE
+    device = torch.device(hc.DEFAULT_DEVICE)
     latent_dim = 128
     hair_classes = len(hair_mapping)
     eye_classes = len(eye_mapping)
 
-    G = Generator(latent_dim, hair_classes + eye_classes).to(device)
+    G = Generator(
+        latent_dim,
+        hair_classes + eye_classes,
+        extra_layers=0,
+    ).to(device)
     prev_state = torch.load(args.gen_model_dir)
     G.load_state_dict(prev_state["model"])
+
     G = G.eval()
 
     action_map = {

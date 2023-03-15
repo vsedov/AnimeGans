@@ -1,0 +1,111 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabu}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+
+\setlength\parindent{0pt}
+
+\title{Mode Collapse, Example }
+
+\author{%
+vsedov
+}
+
+\begin{document}
+
+\maketitle
+
+Data
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-2-Panel-0-7eucaii9d}
+\caption{}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-2-Panel-1-axsigh7eq}
+\caption{}
+\endminipage
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-2-Panel-2-7yauxmdbs}
+\caption{}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-2-Panel-3-hqvgky492}
+\caption{}
+\endminipage
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-2-Panel-4-y5h491nme}
+\caption{}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-2-Panel-5-kidkdtr9k}
+\caption{}
+\endminipage
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-4-Panel-0-nw9sywl17}
+\caption{}
+\endminipage
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-6-Panel-0-18gi3ocpk}
+\caption{}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-6-Panel-1-erq8uwnrs}
+\caption{}
+\endminipage
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-6-Panel-2-xqm6ld0ek}
+\caption{}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-6-Panel-3-xfjb6llro}
+\caption{}
+\endminipage
+\end{figure}
+
+\begin{figure}[!htb]
+\minipage{0.49\textwidth}
+\includegraphics[width=\linewidth]{charts/Section-6-Panel-4-effowqd4g}
+\caption{}
+\endminipage
+\end{figure}
+
+The auxiliary loss is acting as a regularizer for the generator, ensuring that it
+produces realistic images that also match the specified attributes (hair and eye color). When the auxiliary loss drops suddenly, it means that the generator is no longer being regularized properly, and as a result, it may start producing images that are only realistic but do not match the specified attributes, leading to mode collapse
+
+Solution :
+• Increase regularization strength: One way to prevent sudden drops in the auxiliary loss is to increase the strength of the regularization used in the loss function. This can be achieved by increasing the weight of the auxiliary loss term or introducing additional constraints on
+the generator.
+• Add noise to the latent code: Adding noise to the latent code can help regularize the generator and prevent mode collapse. This can be achieved by introducing random perturbations to the input vector z at each training iteration.
+• Use different loss functions: Another approach could be to use a different loss function that penalizes the generator for producing images that do not match the specified attributes. For example, one could use a Wasserstein distance-based loss that penalizes the difference between the generated and real data distributions.
+• Monitor auxiliary loss during training: Monitoring the auxiliary loss during training andadjusting the regularization strength accordingly can help prevent sudden drops. This can involve setting up early stopping criteria that trigger when the loss drops below a certain threshold or using adaptive regularization techniques that adjust the regularization strength based on the loss value.
+
+• Use adversarial training: Adversarial training is a technique that involves training the
+generator and discriminator in an alternating fashion. This can help stabilize the training process and prevent mode collapse by encouraging the generator to produce more diverse
+images. Implications : This is a common issue in auxiliary generative adversarial networks, and un-derstanding its underlying causes and solutions can help improve the performance and stability of such networks
+
+\nocite{*}
+\bibliographystyle{unsrt}
+\bibliography{bibliography}
+\end{document}

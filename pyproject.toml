@@ -46,6 +46,8 @@ pyflyby = "^1.8.2"
 imageio = "^2.26.0"
 chainer = "^7.8.1"
 protobuf = "3.20"
+imageio-ffmpeg = "^0.4.8"
+moviepy = "^1.0.3"
 
 
 [tool.poetry.dev-dependencies]

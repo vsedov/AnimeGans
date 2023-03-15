@@ -14,15 +14,12 @@ test1/
 types/
 wandb/
 img_align_celeba/
-checkpoints/
-
+*.ckpt
 # Thinsg that you can just download if you follow the right steps
 *.png
-rewrite/
 *.caffemodel
 *.json.gz
-
-
+*.gif
 # Distribution / packaging
 .Python
 build/
