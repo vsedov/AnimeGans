@@ -5,132 +5,96 @@ from pathlib import Path
 
 from PIL import Image
 from imageio import v2 as imageio
+from moviepy.editor import ImageSequenceClip
 from tqdm import tqdm
 
 from src.core import hc
 
+parser = argparse.ArgumentParser(
+    description="Create a gif from a directory of images"
+)
+parser.add_argument(
+    "--save_path",
+    default=f"{hc.DIR}results/anime",
+    help="Path to save the gif",
+)
+parser.add_argument(
+    "--img_dir",
+    default=f"{hc.DIR}/results/",
+    help="Directory containing the images",
+)
+parser.add_argument(
+    "--format",
+    choices=["mp4", "gif"],
+    default="mp4",
+    help="Output format (default: mp4)",
+)
+args = parser.parse_args()
+save_path = (
+    args.save_path + ".mp4" if args.format == "mp4" else args.save_path + ".gif"
+)
 
-class ImageGridGif:
-    """
-    Class to create a gif from a directory of images with a grid layout.
+# Define a function to create an image file from the 8x8 grid images
+def create_grid(img_path, output_dir):
+    img = Image.open(img_path)
 
-    Attributes
-    ----------
-    img_dir : pathlib.Path
-        Path to the directory containing the input PNG images.
-    save_path : pathlib.Path
-        Path to save the output gif.
-    num_threads : int
-        Number of threads to use for processing the images.
+    # Calculate the number of rows and columns for the grid
+    img_width, img_height = img.size
+    grid_cols = 8
+    grid_rows = img_height // (img_width // grid_cols * 8)
 
-    Methods
-    -------
-    create_grid(img_path, crop_dir)
-        Create a grid of 8x8 images from the input PNG file and save them to the specified directory.
-    create_gif()
-        Create a gif from the cropped images in the specified directory.
-    """
+    # Create a new image to hold the 8x8 grid
+    grid_img = Image.new(mode="RGB", size=(img_width, img_width))
 
-    def __init__(self, args):
-        """
-        Initialize the ImageGridGif object.
+    # Crop out each 8x8 grid and paste it onto the grid image
+    for row in range(grid_rows):
+        for col in range(grid_cols):
+            x = col * img_width // grid_cols
+            y = row * img_width // grid_cols * 8
+            w = img_width // grid_cols
+            h = img_width // grid_cols * 8
+            crop_img = img.crop((x, y, x + w, y + h))
+            grid_img.paste(crop_img, (x, y))
 
-        Parameters
-        ----------
-        args : argparse.Namespace
-            Parsed arguments from the command line.
-        """
-        self.img_dir = Path(args.img_dir)
-        self.save_path = Path(args.save_path)
-        self.num_threads = args.num_threads
-
-    def create_grid(self, img_path, crop_dir):
-        """
-        Create a grid of 8x8 images from the input PNG file and save them to the specified directory.
-
-        Parameters
-        ----------
-        img_path : pathlib.Path
-            Path to the input PNG file.
-        crop_dir : pathlib.Path
-            Path to the directory to save the cropped images.
-        """
-        img = Image.open(img_path)
-
-        # Calculate the number of rows and columns for the grid
-        img_width, img_height = img.size
-        grid_cols = 8
-        grid_rows = img_height // (img_width // grid_cols * 8)
-
-        # Create a new directory to hold the cropped images
-        crop_dir.mkdir(parents=True, exist_ok=True)
-
-        # Crop out each 8x8 grid and save it to a new file
-        for row in range(grid_rows):
-            for col in range(grid_cols):
-                x = col * img_width // grid_cols
-                y = row * img_width // grid_cols * 8
-                w = img_width // grid_cols
-                h = img_width // grid_cols * 8
-                crop_img = img.crop((x, y, x + w, y + h))
-                crop_img.save(crop_dir / f"{row}_{col}.png")
-
-    def create_gif(self):
-        """
-        Create a gif from the cropped images in the specified directory.
-        """
-        threads = []
-        for img_path in self.img_dir.glob("*.png"):
-            crop_dir = Path(os.path.splitext(img_path)[0])
-            thread = threading.Thread(
-                target=self.create_grid, args=(img_path, crop_dir)
-            )
-            thread.start()
-            threads.append(thread)
-
-        for thread, img_path in zip(threads, self.img_dir.glob("*.png")):
-            thread.join()
-            print(f"Processed {img_path}")
-            tqdm.write(f"Processed {img_path}")
-
-        # Create a gif from the cropped images
-        with imageio.get_writer(self.save_path, mode="I", fps=8) as writer:
-            for crop_subdir in self.img_dir.glob("*"):
-                grid_filenames = sorted(crop_subdir.glob("*.png"))
-                for filename in tqdm(grid_filenames):
-                    writer.append_data(imageio.imread(str(filename)))
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Create a gif from a directory of images"
+    # Save the grid image to a file
+    output_path = os.path.join(
+        output_dir,
+        "merged_{}.png".format(os.path.splitext(os.path.basename(img_path))[0]),
     )
-    parser.add_argument(
-        "--save_path",
-        default=f"{hc.DIR}results/anime.gif",
-        help="Path to save the gif",
-    )
-    parser.add_argument(
-        "--img_dir",
-        default=f"{hc.DIR}/results/",
-        help="Directory containing the images",
-    )
-    parser.add_argument(
-        "--max_frames",
-        type=int,
-        default=1,
-        help="Max number of frames in the gif",
-    )
-    parser.add_argument(
-        "--step", type=int, default=10, help="Step between frames in the gif"
-    )
-    parser.add_argument(
-        "--num_threads",
-        type=int,
-        default=30,
-        help="Number of threads to use for processing the images",
-    )
-    args = parser.parse_args()
+    grid_img.save(output_path)
 
-    image_grid_gif = ImageGridGif(args)
-    image_grid_gif.create_gif()
+
+# Create a thread for each image file and crop out each 8x8 grid concurrently
+threads = []
+output_dir = os.path.join(args.img_dir, "merged")
+os.makedirs(output_dir, exist_ok=True)
+
+for img_path in Path(args.img_dir).glob("*.png"):
+    thread = threading.Thread(target=create_grid, args=(img_path, output_dir))
+    thread.start()
+    threads.append(thread)
+
+# Wait for all threads to finish
+for thread in threads:
+    thread.join()
+
+# Create a gif from the merged grid images
+merged_files = sorted(Path(output_dir).glob("*.png"))
+
+if args.format == "mp4":
+    with tqdm(total=len(merged_files), desc="Creating mp4") as pbar:
+        clip = ImageSequenceClip([str(f) for f in merged_files], fps=8)
+        clip.write_videofile(
+            save_path, fps=8, codec="libx264", bitrate="30000k"
+        )
+        pbar.update(1)
+else:
+    with tqdm(total=len(merged_files), desc="Creating gif") as pbar:
+        with imageio.get_writer(save_path, mode="I", fps=8) as writer:
+            for filename in merged_files:
+                frame = imageio.imread(str(filename))
+                writer.append_data(frame)
+                pbar.update(1)
+                frame = (
+                    None  # set the frame to None to release the image memory
+                )
