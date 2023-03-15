@@ -19,8 +19,7 @@ img_align_celeba/
 *.png
 *.caffemodel
 *.json.gz
-
-
+*.gif
 # Distribution / packaging
 .Python
 build/
