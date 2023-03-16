@@ -129,7 +129,7 @@ def validate_data_loader(train_loader):
 
 
 def generate_dataset():
-    path_data = f"{hc.DIR}/data/"
+    path_data = f"{hc.DIR}data/"
     transform_anime = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -137,7 +137,7 @@ def generate_dataset():
         ]
     )
     return get_dataset(
-        f"{hc.DIR}/create_data/features.csv", path_data, transform_anime
+        f"{hc.DIR}create_data/features.csv", path_data, transform_anime
     )
 
 
