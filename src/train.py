@@ -83,7 +83,7 @@ def parse_args():
     )
     parser.add_argument(
         "-C",
-        "--check_point_save_split ",
+        "--cp_per_save",
         type=int,
         default=0,
         help="Add a checkpoint split, Number of epochs you want to save your models",
@@ -325,6 +325,8 @@ def main(
 
     # Define loss function
     criterion = nn.BCELoss()
+    # Wrong output this does
+    # criterion = nn.BCEWithLogitsLoss()
 
     if args.wandb == "true":
         wandb.watch(criterion)
@@ -360,6 +362,7 @@ def main(
                 batch_size=batch_size,
                 hair_classes=hair_classes,
                 eye_classes=eye_classes,
+                use_numpy=False,
             ).to(DEVICE)
             fake_img = G(z, fake_tag).to(DEVICE)
 
@@ -427,11 +430,9 @@ def main(
             G_loss.backward()
             G_optim.step()
 
-            # Print the data
-            print(
+            tqdm.tqdm.write(
                 f"Epoch: {epoch + 1}/{iterations} Iteration: {step_i + 1}/{len(train_loader)} Loss D: {D_loss.item():.4f} Loss G: {G_loss.item():.4f}"
             )
-            print("\n")
 
             if G_loss.item() < best_g_loss:
                 best_g_loss = G_loss.item()
@@ -467,12 +468,12 @@ def main(
                     ),
                 )
 
-            # if (step_i == 0 and args.check_point_save_split == 0) or (
-            #     args.check_point_save_split != 0
-            #     and epoch % args.check_point_save_split == 0
-            #     and step_i == 0
-            # ):
-            if epoch % 100 == 0 and step_i == 0:
+            if (step_i == 0 and args.cp_per_save == 0) or (
+                args.cp_per_save != 0
+                and epoch % args.cp_per_save == 0
+                and step_i == 0
+            ):
+                # if epoch % 100 == 0 and step_i == 0:
                 save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch)
 
             generate_by_attributes(
