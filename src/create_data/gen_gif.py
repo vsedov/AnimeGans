@@ -20,7 +20,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--img_dir",
-    default=f"{hc.DIR}/results/",
+    default=f"{hc.DIR}results/",
     help="Directory containing the images",
 )
 parser.add_argument(

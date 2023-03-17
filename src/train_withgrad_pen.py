@@ -5,6 +5,30 @@
 # These are helper functions, if you want them imported in
 # from src.core import hp
 
+#  ╭────────────────────────────────────────────────────────────────────╮
+#  │ gradient penalty technique to improve the stability of the         │
+#  │  GAN training.                                                     │
+#  │ Specifically, it adds a penalty term to the discriminator's        │
+#  │  loss, which                                                       │
+#  │ encourages the gradients of the discriminator to be close to 1 for │
+#  │ all points in the input space This helps prevent the discriminator │
+#  │ from being too powerful, which can lead to mode collapse and       │
+#  │  other issues.                                                     │
+#  │                                                                    │
+#  │ The code computes the gradient penalty by interpolating            │
+#  │  between real                                                      │
+#  │ and fake images, and then computing the norm of the gradients      │
+#  │ of the discriminator's output with respect to the interpolated     │
+#  │ images. The penalty is then added to the discriminator's loss,     │
+#  │ along with the usual adversarial loss and auxiliary losses for     │
+#  │ the hair and eye tags.                                             │
+#  │                                                                    │
+#  │ The code also trains the generator as usual, with a loss           │
+#  │ that includes the adversarial loss and auxiliary losses for        │
+#  │ the hair and eye tags. If wandb logging is enabled, it logs        │
+#  │ various loss values for both the discriminator and generator.      │
+#  │                                                                    │
+#  ╰────────────────────────────────────────────────────────────────────╯
 
 import os
 import pathlib
@@ -337,6 +361,7 @@ def main(
 
     best_g_loss = float("inf")
     train_loader = generate_train_loader(batch_size=batch_size)
+    lambda_gp = 10  # weight for gradient penalty
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
             print(
@@ -368,44 +393,39 @@ def main(
 
             real_score, real_hair_predict, real_eye_predict = D(real_img)
             fake_score, _, _ = D(fake_img)
-            # Reshale all values to batch_size now
 
-            for x in [real_score, real_hair_predict, real_eye_predict]:
-                log.log(5, x.shape)
-            #  ╭────────────────────────────────────────────────────────────────────╮
-            #  │                                                                    │
-            #  │             THERE IS AN ERROR HERE< ONCE THE HAIR AND EYE AUX      │
-            #  │  LOSS DROPS MODEL BLOWS UP                                         │
-            #  │                                                                    │
-            #  ╰────────────────────────────────────────────────────────────────────╯
+            # Compute gradient penalty
+            alpha = torch.rand(batch_size, 1, 1, 1).to(DEVICE)
+            interpolates = (
+                alpha * real_img + (1 - alpha) * fake_img
+            ).requires_grad_(True)
+            d_interpolates, _, _ = D(interpolates)
+            gradients = torch.autograd.grad(
+                outputs=d_interpolates,
+                inputs=interpolates,
+                grad_outputs=torch.ones_like(d_interpolates),
+                create_graph=True,
+                retain_graph=True,
+                only_inputs=True,
+            )[0]
+            gradient_penalty = (
+                (gradients.norm(2, dim=1) - 1) ** 2
+            ).mean() * lambda_gp
 
+            # Compute losses
             real_discrim_loss = criterion(real_score, soft_label)
             fake_discrim_loss = criterion(fake_score, fake_label)
-
-            #  REVISIT: (vsedov) (16:41:06 - 13/03/23): Fix mode collapse issue
-            #  with respect to eye loss
             real_hair_aux_loss = criterion(real_hair_predict, hair_tags)
             real_eye_aux_loss = criterion(real_eye_predict, eye_tags)
             real_classifier_loss = real_hair_aux_loss + real_eye_aux_loss
 
             discrim_loss = (real_discrim_loss + fake_discrim_loss) * 0.5
+            D_loss = discrim_loss + real_classifier_loss + gradient_penalty
 
-            D_loss = discrim_loss + real_classifier_loss
+            # Update discriminator
             D_optim.zero_grad()
             D_loss.backward()
             D_optim.step()
-
-            if args.wandb == "true":
-                wandb.log(
-                    {
-                        "step": step_i,
-                        "real_discrim_loss": real_discrim_loss.item(),
-                        "fake_discrim_loss": fake_discrim_loss.item(),
-                        "real_hair_aux_loss": real_hair_aux_loss.item(),
-                        "real_eye_aux_loss": real_eye_aux_loss.item(),
-                        "real_classifier_loss hair + eye": real_classifier_loss.item(),
-                    },
-                )
 
             # Train generator
             z = torch.randn(batch_size, latent_dim, device=DEVICE)
@@ -413,19 +433,21 @@ def main(
                 batch_size=batch_size,
                 hair_classes=hair_classes,
                 eye_classes=eye_classes,
+                use_numpy=False,
             ).to(DEVICE)
-
-            hair_tag = fake_tag[:, 0:hair_classes]
-            eye_tag = fake_tag[:, hair_classes:]
             fake_img = G(z, fake_tag).to(DEVICE)
 
-            fake_score, hair_predict, eye_predict = D(fake_img)
-            discrim_loss = criterion(fake_score, real_label)
-            hair_aux_loss = criterion(hair_predict, hair_tag)
-            eye_aux_loss = criterion(eye_predict, eye_tag)
-            classifier_loss = hair_aux_loss + eye_aux_loss
+            fake_score, fake_hair_predict, fake_eye_predict = D(fake_img)
+            fake_discrim_loss = criterion(fake_score, real_label)
+            fake_hair_aux_loss = criterion(
+                fake_hair_predict, fake_tag[:, :hair_classes]
+            )
+            fake_eye_aux_loss = criterion(
+                fake_eye_predict, fake_tag[:, hair_classes:]
+            )
+            fake_classifier_loss = fake_hair_aux_loss + fake_eye_aux_loss
 
-            G_loss = classifier_loss + discrim_loss
+            G_loss = fake_discrim_loss + fake_classifier_loss
             G_optim.zero_grad()
             G_loss.backward()
             G_optim.step()
@@ -443,14 +465,21 @@ def main(
                 )
 
             if args.wandb == "true":
+
                 wandb.log(
                     {
+                        "step": step_i,
                         "D_loss": D_loss.item(),
                         "G_loss": G_loss.item(),
-                        "discrim_loss": discrim_loss,
-                        "gen_loss / Classifier loss ": classifier_loss,
-                        "hair_aux_loss": hair_aux_loss,
-                        "eye_aux_loss": eye_aux_loss,
+                        "real_discrim_loss": real_discrim_loss.item(),
+                        "fake_discrim_loss": fake_discrim_loss.item(),
+                        "real_hair_aux_loss": real_hair_aux_loss.item(),
+                        "real_eye_aux_loss": real_eye_aux_loss.item(),
+                        "fake_hair_aux_loss": fake_hair_aux_loss.item(),
+                        "fake_eye_aux_loss": fake_eye_aux_loss.item(),
+                        "real_classifier_loss hair + eye": real_classifier_loss.item(),
+                        "fake_classifier_loss hair + eye": fake_classifier_loss.item(),
+                        "gradient_penalty": gradient_penalty.item(),
                     }
                 )
 
