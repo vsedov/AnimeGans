@@ -85,7 +85,7 @@ def parse_args():
         "-C",
         "--cp_per_save",
         type=int,
-        default=0,
+        default=10,  # have it save every 50 epochs
         help="Add a checkpoint split, Number of epochs you want to save your models",
     )
 
