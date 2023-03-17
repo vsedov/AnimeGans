@@ -18,9 +18,9 @@ def parse_args():
             "eye",
             "sample_dir",
             "batch_size",
-            "extra_generator_layers",
             "epoch",
             "check_point_number",
+            "extra_generator_layers",
             "gen_model_dir",
         ],
     )
@@ -71,17 +71,18 @@ def parse_args():
         "-e",
         "--epoch",
         help="Number of epochs used during training., if previous models are used, please refer to a given batch number that you would default to train with. ",
-        default=5,
+        default=100,
         type=int,
     )
     parser.add_argument(
         "-c",
         "--check_point_number",
-        help="Checkpoint number to use.",
-        default=4,
-        type=int,
+        help="Checkpoint number to use or you can use 'best'",
+        default=100,
+        # type=Union[int, str],
     )
     parser.add_argument(
+        "-E",
         "--extra_generator_layers",
         help="Add extra layers to the generator.",
         default=1,
@@ -89,7 +90,10 @@ def parse_args():
     )
 
     args = parser.parse_args()
-    args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
+    if args.check_point_number == "best":
+        args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_best_.ckpt"
+    else:
+        args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
 
     return Args(*args.__dict__.values())
 
@@ -116,10 +120,13 @@ def main(args):
     hair_classes = len(hair_mapping)
     eye_classes = len(eye_mapping)
 
+    print(args.extra_generator_layers)
+    print(type(args.extra_generator_layers))
+
     G = Generator(
         latent_dim,
         hair_classes + eye_classes,
-        extra_layers=0,
+        extra_layers=args.extra_generator_layers,
     ).to(device)
     prev_state = torch.load(args.gen_model_dir)
     G.load_state_dict(prev_state["model"])
