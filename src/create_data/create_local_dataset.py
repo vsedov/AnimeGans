@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
-from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
@@ -82,49 +81,13 @@ def get_dataloader(dataset, batch_size, num_workers, shuffle, drop_last):
 
 def validate_data_loader(train_loader):
 
+    data = generate_dataset()
     for step, (real, ahir, eye) in enumerate(train_loader):
         # Get the hair color and eye color for each image
         hair_color = np.argmax(ahir.numpy(), axis=1)
         eye_color = np.argmax(eye.numpy(), axis=1)
-        hair_colors = [
-            "orange",
-            "white",
-            "aqua",
-            "gray",
-            "green",
-            "red",
-            "purple",
-            "pink",
-            "blue",
-            "black",
-            "brown",
-            "blonde",
-        ]
-        eye_colors = [
-            "gray",
-            "black",
-            "orange",
-            "pink",
-            "yellow",
-            "aqua",
-            "purple",
-            "green",
-            "brown",
-            "red",
-            "blue",
-        ]
-        # Plot the first 10 images
-        fig = plt.figure(figsize=(5, 5))
-        for i in range(10):
-            ax = fig.add_subplot(5, 5, i + 1)
-            ax.imshow(np.array(real[i].permute(1, 2, 0)))
-            ax.axis("off")
-            ax.set_title(
-                f"Hair: {hair_colors[hair_color[i]]}, Eye: {eye_colors[eye_color[i]]}"
-            )
-
-        plt.tight_layout()
-        plt.show()
+        print(hair_color)
+        print(eye_color)
         break
 
 
