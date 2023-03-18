@@ -9,6 +9,57 @@ from src.models.ACGAN import Generator
 from src.utils.torch_utils import *
 
 
+def generate_images(
+    args, G, device, latent_dim, hair_classes, eye_classes, output_dir=None
+):
+    action_map = {
+        "fix_hair_eye": lambda: generate_by_attributes(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir if output_dir is None else output_dir,
+            hair_color=args.hair,
+            eye_color=args.eye,
+        ),
+        "change_eye": lambda: eye_grad(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir if output_dir is None else output_dir,
+        ),
+        "change_hair": lambda: hair_grad(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir if output_dir is None else output_dir,
+        ),
+        "interpolate": lambda: interpolate(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir if output_dir is None else output_dir,
+        ),
+        "fix_noise": lambda: fix_noise(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir if output_dir is None else output_dir,
+        ),
+    }
+
+    action_map.get(args.type, lambda: None)()
+
+
 def parse_args():
     Args = namedtuple(
         "Args",
@@ -21,6 +72,7 @@ def parse_args():
             "epoch",
             "check_point_number",
             "extra_generator_layers",
+            "range",
             "gen_model_dir",
         ],
     )
@@ -81,12 +133,19 @@ def parse_args():
         default=100,
         # type=Union[int, str],
     )
+
     parser.add_argument(
         "-E",
         "--extra_generator_layers",
         help="Add extra layers to the generator.",
         default=1,
         type=int,
+    )
+    parser.add_argument(
+        "-r",
+        "--range",
+        help="Range of checkpoint numbers to use, separated by a colon (e.g. 10:50:STEP).",
+        type=str,
     )
 
     args = parser.parse_args()
@@ -128,37 +187,33 @@ def main(args):
         hair_classes + eye_classes,
         extra_layers=args.extra_generator_layers,
     ).to(device)
-    prev_state = torch.load(args.gen_model_dir)
-    G.load_state_dict(prev_state["model"])
+    if args.range:
+        start, end, step = map(int, str(args.range).split(":"))
+        if args.check_point_number == "best":
+            return ValueError("Cannot use `best` with `range`.")
 
-    G = G.eval()
+        for i in range(start, end + 1, step):
+            gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{i}.ckpt"
+            prev_state = torch.load(gen_model_dir)
+            G.load_state_dict(prev_state["model"])
+            G = G.eval()
+            output_dir = os.path.join(args.sample_dir, "batch_images", f"G_{i}")
+            os.makedirs(output_dir, exist_ok=True)
+            generate_images(
+                args,
+                G,
+                device,
+                latent_dim,
+                hair_classes,
+                eye_classes,
+                output_dir,
+            )
+    else:
 
-    action_map = {
-        "fix_hair_eye": lambda: generate_by_attributes(
-            G,
-            device,
-            latent_dim,
-            hair_classes,
-            eye_classes,
-            args.sample_dir,
-            hair_color=args.hair,
-            eye_color=args.eye,
-        ),
-        "change_eye": lambda: eye_grad(
-            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
-        ),
-        "change_hair": lambda: hair_grad(
-            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
-        ),
-        "interpolate": lambda: interpolate(
-            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
-        ),
-        "fix_noise": lambda: fix_noise(
-            G, device, latent_dim, hair_classes, eye_classes, args.sample_dir
-        ),
-    }
-
-    action_map.get(args.type, lambda: None)()
+        prev_state = torch.load(args.gen_model_dir)
+        G.load_state_dict(prev_state["model"])
+        G = G.eval()
+        generate_images(args, G, device, latent_dim, hair_classes, eye_classes)
 
     print("Completed generating images for the given arguments:")
     print("\n")
