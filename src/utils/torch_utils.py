@@ -349,3 +349,11 @@ def interpolate(
     z2, _ = generate_random_vector(
         latent_dim, hair_classes, eye_classes, device
     )
+
+    img_list = []
+    for i in range(samples):
+        z = z1 + (z2 - z1) * i / (samples - 1)
+        img_list.append(model(z, c1))
+
+    output = torch.cat(img_list, dim=0)
+    vutils.save_image(output, f"{sample_dir}/interpolate.png", nrow=samples)
