@@ -30,7 +30,7 @@ tags = [
     "blue eyes",
 ]
 
-imgs = glob.glob("../data/*.png")
+imgs = glob.glob("../data/*.jpg")
 imgs_nums = set(re.findall(r"\d+", img)[-1] for img in imgs)
 
 with open("features.pickle", "rb") as handle:

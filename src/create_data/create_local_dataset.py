@@ -1,6 +1,5 @@
 import os
 
-import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
@@ -35,8 +34,9 @@ class AttrDataset(Dataset):
 
     def __getitem__(self, idx):
         img_name = os.path.join(
-            self.root_dir, str(self.attr_list.iloc[idx, 0]) + ".png"
+            self.root_dir, str(self.attr_list.iloc[idx, 0]) + ".jpg"
         )
+
         image = Image.open(img_name).convert("RGB")
         attrs = self.attr_list.iloc[idx, 1:].astype(float).values
 
@@ -81,14 +81,9 @@ def get_dataloader(dataset, batch_size, num_workers, shuffle, drop_last):
 
 def validate_data_loader(train_loader):
 
-    data = generate_dataset()
     for step, (real, ahir, eye) in enumerate(train_loader):
-        # Get the hair color and eye color for each image
-        hair_color = np.argmax(ahir.numpy(), axis=1)
-        eye_color = np.argmax(eye.numpy(), axis=1)
-        print(hair_color)
-        print(eye_color)
-        break
+        print(real.shape)
+        pass
 
 
 def generate_dataset():

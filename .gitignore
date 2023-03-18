@@ -10,6 +10,8 @@ gallery-dl/
 *.mpv
 # C extensions
 *.so
+*.jpg
+*.log
 test1/
 types/
 wandb/

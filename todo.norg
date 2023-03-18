@@ -7,15 +7,12 @@ version: 0.0.17
 @end
 
 
-* Todo High Priority
-  - [ ] Factor out Anime Dataset: needs to be preprocessed correctly
-  - [ ] Create a core abc setup for the main setup
-  - [ ] Evaluation of Gans
-  - [ ] Create a tui, such that you can install the ds required, depending on the configuration
+* Completed
+  - (x)  Factor out Anime Dataset: needs to be preprocessed correctly
+  - (x)  Create a core abc setup for the main setup
+  - (x)  Evaluation of Gans
+  - (x) Create a tui, such that you can install the ds required, depending on the configuration
+  - (x) Refactor some code for better understanding
+  - (x) Better Documentation
 
-* Todo Medium Priority 
-  - [ ] Maybe use a json file for constants ? if current dictionary method using a class is not ideal 
-  - [ ] Refactor some code for better understanding
 
-* Todo Low Priority
-  - [ ] Better Documentation

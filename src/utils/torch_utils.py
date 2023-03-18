@@ -1,7 +1,9 @@
+import loguru
 import numpy as np
 import torch
 from torchvision import utils as vutils
 
+log = loguru.logger
 """Hair and eye color mappings and dictionaries."""
 hair_mapping = [
     "orange",
@@ -144,6 +146,15 @@ def get_random_label(batch_size, hair_classes, eye_classes, use_numpy=True):
 
         hair_code[range(batch_size), hair_type] = 1
         eye_code[range(batch_size), eye_type] = 1
+
+    log.log(5, f"hair_type: {hair_type}")
+    log.log(5, f"eye_type: {eye_type}")
+    log.log(5, f"hair_code: {hair_code}")
+    log.log(5, f"eye_code: {eye_code}")
+    log.log(
+        5,
+        f"torch.cat((hair_code, eye_code), dim=1): {torch.cat((hair_code, eye_code), dim=1)}",
+    )
 
     return torch.cat((hair_code, eye_code), dim=1)
 
@@ -349,3 +360,11 @@ def interpolate(
     z2, _ = generate_random_vector(
         latent_dim, hair_classes, eye_classes, device
     )
+
+    img_list = []
+    for i in range(samples):
+        z = z1 + (z2 - z1) * i / (samples - 1)
+        img_list.append(model(z, c1))
+
+    output = torch.cat(img_list, dim=0)
+    vutils.save_image(output, f"{sample_dir}/interpolate.png", nrow=samples)

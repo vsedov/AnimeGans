@@ -2,6 +2,17 @@
 
 This project is a comparative study on the workings of Generative Adversarial Networks (GANs) using Anime Face Data. The project aims to generate facial images of Anime, Dogs, and Humans using sketches and Deep Convolutional Gans (DCGAN). The project is developed using the PyTorch framework and is trained on a NVIDIA GeForce RTX GPU machine. The project uses Cats and Dogs, Human Faces, and Anime Faces datasets.
 
+# How to run
+
+```bash
+python -m src [train, test] [options]
+```
+
+If you have not done any of the preprocessing steps required for this project,
+this project will not run, there is a provided, pretrained model, and i have
+also given instructions on how to run this project, within the
+`src/create_dataset` folder and the `src` folder itself.
+
 # Examples
 
 ## Training
@@ -55,6 +66,22 @@ The project now uses auxiliary Gans, with one DCGAN having extra layers and anot
 # Evaluation
 
 The evaluation of auxiliary Gans compared to normal Gans and CGANs will provide valuable insights into the workings of GANs.
+
+After working with ACGANs and experiencing issues with mode collapse, I realized that although the labeling was correct, the resulting images produced by the model had a distorted, "acid-like" appearance. In order to address this problem, I decided to switch to a new method that used gradient penalty to help stabilize the training process. By incorporating a gradient penalty term into the generator and discriminator loss functions, I was able to encourage the model to learn more diverse and representative features, which ultimately led to higher-quality generated images.
+
+## AC-GAns
+
+AcGan (Auxiliary Classifier GAN) is a type of generative adversarial network (GAN) that is used for image synthesis tasks. It was introduced in a 2016 paper by Odena et al. and is notable for its use of an auxiliary classifier in the discriminator network. The auxiliary classifier helps to classify both the real and generated images by their class labels, which are typically used to control the features of the generated images.
+
+One of the key benefits of AcGan is that it allows for the generation of images that can be controlled based on specific class labels. For example, in a dataset of faces, different labels could be assigned to different attributes of the face, such as hair color, eye color, or gender. This allows the generator to learn to produce images that match specific attributes, and the discriminator to learn to distinguish between real and fake images based on those attributes.
+
+However, AcGan has a known issue of mode collapse, where the generator produces limited variations of the same type of image. This occurs because the discriminator's auxiliary classifier is trained to classify the generated images by their class label, which can result in the generator learning to produce only a few types of images that are similar to each other.
+
+## WAC-GANs [Proposed Model]
+
+WAC-GAN (Wasserstein Auxiliary Classifier GAN) is a type of GAN that was introduced as an extension of AcGan by Gulrajani et al. in a 2017 paper. It incorporates a Wasserstein distance metric and gradient penalty to improve the stability of training and reduce the occurrence of mode collapse.
+The Wasserstein distance metric is used to measure the distance between the generated and real distributions, while the gradient penalty is used to ensure that the discriminator has a gradient with respect to the input data. By incorporating these techniques, WAC-GAN is able to produce more diverse and high-quality images compared to AcGan.
+One key advantage of WAC-GAN is its ability to generate images with high fidelity while maintaining control over specific attributes. The use of the Wasserstein distance metric and gradient penalty also leads to more stable training and better convergence properties compared to other GAN architectures.
 
 # Rewrite
 
