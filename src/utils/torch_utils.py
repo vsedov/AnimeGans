@@ -147,12 +147,12 @@ def get_random_label(batch_size, hair_classes, eye_classes, use_numpy=True):
         hair_code[range(batch_size), hair_type] = 1
         eye_code[range(batch_size), eye_type] = 1
 
-    log.log("DEBUG", f"hair_type: {hair_type}")
-    log.log("DEBUG", f"eye_type: {eye_type}")
-    log.log("DEBUG", f"hair_code: {hair_code}")
-    log.log("DEBUG", f"eye_code: {eye_code}")
+    log.log(5, f"hair_type: {hair_type}")
+    log.log(5, f"eye_type: {eye_type}")
+    log.log(5, f"hair_code: {hair_code}")
+    log.log(5, f"eye_code: {eye_code}")
     log.log(
-        "DEBUG",
+        5,
         f"torch.cat((hair_code, eye_code), dim=1): {torch.cat((hair_code, eye_code), dim=1)}",
     )
 
