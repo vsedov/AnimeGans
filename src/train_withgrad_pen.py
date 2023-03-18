@@ -54,28 +54,28 @@ log = loguru.logger
 
 hair = [
     "orange",
-    "white",
+    # "white",
     "aqua",
-    "gray",
+    # "gray",
     "green",
     "red",
     "purple",
-    "pink",
+    # "pink",
     "blue",
     "black",
-    "brown",
+    # "brown",
     "blonde",
 ]
 eyes = [
     "gray",
-    "black",
+    # "black",
     "orange",
-    "pink",
+    # "pink",
     "yellow",
-    "aqua",
+    # "aqua",
     "purple",
     "green",
-    "brown",
+    # "brown",
     "red",
     "blue",
 ]
@@ -109,7 +109,7 @@ def parse_args():
         "-C",
         "--cp_per_save",
         type=int,
-        default=10,  # have it save every 50 epochs
+        default=5,
         help="Add a checkpoint split, Number of epochs you want to save your models",
     )
 
@@ -169,11 +169,29 @@ def parse_args():
         type=str,
         help="Use best model instead [number:{}, best]",
     )
+    parser.add_argument(
+        "-L",
+        "--lambda_gp",
+        type=float,
+        default=0.1,
+        help="Gradient penalty lambda",
+    )
 
     return parser.parse_args()
 
 
 def save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch, is_best=False):
+    """
+    Saves both the generator and discriminator models.
+    args:
+        G: Generator model
+        D: Discriminator model
+        G_optim: Generator optimizer
+        D_optim: Discriminator optimizer
+        checkpoint_dir: Directory to save the models
+        epoch: Current epoch
+        is_best: Whether the current model is the best model so far
+    """
     suffix = "" if is_best else str(epoch)
     save_model(
         model=G,
@@ -361,7 +379,7 @@ def main(
 
     best_g_loss = float("inf")
     train_loader = generate_train_loader(batch_size=batch_size)
-    lambda_gp = 10  # weight for gradient penalty
+    lambda_gp = args.lambda_gp  # weight for gradient penalty
     for epoch in tqdm.trange(iterations, desc="Epoch Loop"):
         if epoch < start_step:
             print(
@@ -459,7 +477,7 @@ def main(
             if G_loss.item() < best_g_loss:
                 best_g_loss = G_loss.item()
 
-                print(f"Saving Best Model {G_loss.item()} best loss ")
+                tqdm.tqdm.write(f"Saving Best Model {G_loss.item()} best loss ")
                 save_both(
                     G, D, G_optim, D_optim, checkpoint_dir, epoch, is_best=True
                 )
