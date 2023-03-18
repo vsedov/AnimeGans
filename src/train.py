@@ -1,10 +1,27 @@
-# These are helper functions, if you want them imported in
-# from src.core import hp
-
-
-# These are helper functions, if you want them imported in
-# from src.core import hp
-
+#  ╭────────────────────────────────────────────────────────────────────╮
+#  │ gradient penalty technique to improve the stability of the         │
+#  │  GAN training.                                                     │
+#  │ Specifically, it adds a penalty term to the discriminator's        │
+#  │  loss, which                                                       │
+#  │ encourages the gradients of the discriminator to be close to 1 for │
+#  │ all points in the input space This helps prevent the discriminator │
+#  │ from being too powerful, which can lead to mode collapse and       │
+#  │  other issues.                                                     │
+#  │                                                                    │
+#  │ The code computes the gradient penalty by interpolating            │
+#  │  between real                                                      │
+#  │ and fake images, and then computing the norm of the gradients      │
+#  │ of the discriminator's output with respect to the interpolated     │
+#  │ images. The penalty is then added to the discriminator's loss,     │
+#  │ along with the usual adversarial loss and auxiliary losses for     │
+#  │ the hair and eye tags.                                             │
+#  │                                                                    │
+#  │ The code also trains the generator as usual, with a loss           │
+#  │ that includes the adversarial loss and auxiliary losses for        │
+#  │ the hair and eye tags. If wandb logging is enabled, it logs        │
+#  │ various loss values for both the discriminator and generator.      │
+#  │                                                                    │
+#  ╰────────────────────────────────────────────────────────────────────╯
 
 import os
 import pathlib
@@ -30,28 +47,28 @@ log = loguru.logger
 
 hair = [
     "orange",
-    # "white",
+    "white",  #
     "aqua",
-    # "gray",
+    "gray",  #
     "green",
     "red",
     "purple",
-    # "pink",
+    "pink",  #
     "blue",
     "black",
-    # "brown",
+    "brown",  #
     "blonde",
 ]
 eyes = [
     "gray",
-    # "black",
+    "black",  #
     "orange",
-    # "pink",
+    "pink",  #
     "yellow",
-    # "aqua",
+    "aqua",  #
     "purple",
     "green",
-    # "brown",
+    "brown",  #
     "red",
     "blue",
 ]
@@ -282,23 +299,26 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
 def main(
     args,
 ):
-    # Define configuration batch_size = args.batch_size iterations = args.iterations hair_classes, eye_classes = len(hair), len(eyes) num_classes = hair_classes + eye_classes latent_dim = 128 smooth = 0.9
-
+    # Define configuration batch_size = args.batch_size
+    # iterations = args.iterations
+    # hair_classes, eye_classes = len(hair),
+    # len(eyes) num_classes = hair_classes + eye_classes
+    # latent_dim = 128
+    # smooth = 0.9
     if args.wandb == "true":
         wandb.init(project=args.wandb_project, name=args.wandb_name)
-        wandb.config.update(
+        config = vars(args)
+        config.update(
             {
-                "batch_size": args.batch_size,
-                "iterations": args.iterations,
-                "lr": args.lr,
-                "beta": args.beta,
-                "sample_dir": args.sample_dir,
-                "checkpoint_dir": args.checkpoint_dir,
-                "sample": args.sample,
-                "hair_classes": len(hair),
-                "eye_classes": len(eyes),
+                "len_hair_classes": len(hair),
+                "len_eye_classes": len(eyes),
+                "hair_classes": hair,
+                "eye_classes": eyes,
+                "smooth": 0.9,
+                "latent_dim": 128,
             }
         )
+        wandb.config.update(config)
 
     # Define configuration
     batch_size = args.batch_size
