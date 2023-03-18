@@ -400,6 +400,7 @@ def main(
                 eye_classes=eye_classes,
                 use_numpy=False,
             ).to(DEVICE)
+
             fake_img = G(z, fake_tag).to(DEVICE)
 
             real_score, real_hair_predict, real_eye_predict = D(real_img)
