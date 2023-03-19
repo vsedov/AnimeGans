@@ -7,7 +7,7 @@ import re
 import cv2
 import i2v
 
-DATA_DIR = "../../data"
+DATA_DIR = "../../con"
 
 
 def rename_files(dir_path):
@@ -102,7 +102,7 @@ def process_file(file):
 
 def thread_function(files):
     d = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
         results = list(executor.map(process_file, files))
         for result in results:
             if result is not None:

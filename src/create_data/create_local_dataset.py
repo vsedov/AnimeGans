@@ -38,6 +38,10 @@ class AttrDataset(Dataset):
         )
 
         image = Image.open(img_name).convert("RGB")
+        image = transforms.Resize((64, 64))(
+            image
+        )  # <-- Add this line : resize image due1 to memory error
+
         attrs = self.attr_list.iloc[idx, 1:].astype(float).values
 
         if self.transform:
@@ -83,11 +87,10 @@ def validate_data_loader(train_loader):
 
     for step, (real, ahir, eye) in enumerate(train_loader):
         print(real.shape)
-        pass
 
 
 def generate_dataset():
-    path_data = f"{hc.DIR}data/"
+    path_data = f"{hc.DIR}con/"
     transform_anime = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -95,7 +98,7 @@ def generate_dataset():
         ]
     )
     return get_dataset(
-        f"{hc.DIR}create_data/features.csv", path_data, transform_anime
+        f"{hc.DIR}create_data/con.csv", path_data, transform_anime
     )
 
 

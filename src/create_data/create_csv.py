@@ -30,13 +30,13 @@ tags = [
     "blue eyes",
 ]
 
-imgs = glob.glob("../data/*.jpg")
+imgs = glob.glob("../con/*.jpg")
 imgs_nums = set(re.findall(r"\d+", img)[-1] for img in imgs)
 
-with open("features.pickle", "rb") as handle:
+with open("con.pickle", "rb") as handle:
     d = pickle.load(handle)
 
-with open("features.csv", "a") as csvfile:
+with open("con.csv", "a") as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=tags)
     writer.writeheader()
 
