@@ -368,3 +368,65 @@ def interpolate(
 
     output = torch.cat(img_list, dim=0)
     vutils.save_image(output, f"{sample_dir}/interpolate.png", nrow=samples)
+
+
+def generate_two_images(
+    model,
+    device,
+    latent_dim,
+    hair_classes,
+    eye_classes,
+    sample_dir,
+    hair_colors=None,
+    eye_colors=None,
+    image_size=128,
+):
+    """
+    Generates two image samples with specified attributes.
+
+    Parameters:
+        model (nn.Module): The model to generate images.
+        device (torch.device): The device to run the model on.
+        latent_dim (int): The dimension of the noise vector.
+        hair_classes (int): The number of hair colors.
+        eye_classes (int): The number of eye colors.
+        sample_dir (str): The folder to save images.
+        hair_colors (List[str], optional): A list of the two chosen hair colors. If None, hair colors will be randomly selected.
+        eye_colors (List[str], optional): A list of the two chosen eye colors. If None, eye colors will be randomly selected.
+        image_size (int, optional): The size of the generated images. Defaults to 128.
+
+    Returns:
+        None
+    """
+
+    if hair_colors is None:
+        hair_colors = [np.random.choice(hair_classes) for _ in range(2)]
+
+    if eye_colors is None:
+        eye_colors = [np.random.choice(eye_classes) for _ in range(2)]
+
+    # Generate hair and eye tags
+    hair_tags = [torch.zeros(1, hair_classes).to(device) for _ in range(2)]
+    eye_tags = [torch.zeros(1, eye_classes).to(device) for _ in range(2)]
+
+    for i in range(2):
+        hair_tags[i][0][hair_dict[hair_colors[i]]] = 1
+        eye_tags[i][0][eye_dict[eye_colors[i]]] = 1
+
+    # Concatenate hair and eye tags
+    tags = [torch.cat((hair_tags[i], eye_tags[i]), dim=1) for i in range(2)]
+    z = torch.randn(2, latent_dim).to(device)
+
+    # Generate images
+    for i in range(2):
+        output = model(z[i].unsqueeze(0), tags[i])
+        filename = (
+            f"{sample_dir}/{hair_colors[i]}_hair_{eye_colors[i]}_eyes_{i}.png"
+        )
+        vutils.save_image(
+            output,
+            filename,
+            normalize=True,
+            range=(-1, 1),
+            image_size=image_size,
+        )
