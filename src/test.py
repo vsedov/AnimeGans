@@ -75,21 +75,6 @@ def generate_images(
 
 
 def parse_args():
-    Args = namedtuple(
-        "Args",
-        [
-            "type",
-            "hair",
-            "eye",
-            "sample_dir",
-            "batch_size",
-            "epoch",
-            "check_point_number",
-            "extra_generator_layers",
-            "range",
-            "gen_model_dir",
-        ],
-    )
     parser = ArgumentParser()
     parser.add_argument(
         "-t",
@@ -185,6 +170,26 @@ def parse_args():
         help="qual of the generated images.",
         default=0.9,
         type=float,
+    )
+
+    Args = namedtuple(
+        "Args",
+        [
+            "type",
+            "hair",
+            "eye",
+            "sample_dir",
+            "batch_size",
+            "epoch",
+            "check_point_number",
+            "extra_generator_layers",
+            "range",
+            "num_images",
+            "image_size",
+            "saturation",
+            "qual",
+            "gen_model_dir",
+        ],
     )
 
     args = parser.parse_args()
