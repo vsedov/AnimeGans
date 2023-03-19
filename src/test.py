@@ -55,6 +55,20 @@ def generate_images(
             eye_classes,
             args.sample_dir if output_dir is None else output_dir,
         ),
+        "generate": lambda: image_generation(
+            G,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            args.sample_dir if output_dir is None else output_dir,
+            args.num_images,
+            args.hair,
+            args.eye,
+            args.image_size,
+            args.saturation,
+            args.qual,
+        ),
     }
 
     action_map.get(args.type, lambda: None)()
@@ -87,6 +101,7 @@ def parse_args():
             "change_hair",
             "change_eye",
             "interpolate",
+            "generate",
         ],
         default="fix_noise",
         type=str,
@@ -146,6 +161,30 @@ def parse_args():
         "--range",
         help="Range of checkpoint numbers to use, separated by a colon (e.g. 10:50:STEP).",
         type=str,
+    )
+    parser.add_argument(
+        "--num_images",
+        help="Number of images to generate.",
+        default=2,
+        type=int,
+    )
+    parser.add_argument(
+        "--image_size",
+        help="Size of the generated images.",
+        default=128,
+        type=int,
+    )
+    parser.add_argument(
+        "--saturation",
+        help="Saturation of the generated images.",
+        default=0.9,
+        type=float,
+    )
+    parser.add_argument(
+        "--qual",
+        help="qual of the generated images.",
+        default=0.9,
+        type=float,
     )
 
     args = parser.parse_args()
