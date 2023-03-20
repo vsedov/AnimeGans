@@ -116,14 +116,11 @@ def thread_function(files):
 file_chunks = [files[i : i + 16] for i in range(0, len(files), 16)]
 print(file_chunks)
 
-# Use process-based parallelism to process each chunk
 results_dict = {}
 with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
     for i, result in enumerate(executor.map(thread_function, file_chunks)):
-        # Merge the dictionaries from each chunk into a single dictionary
         results_dict.update(result)
 
-        # Print the progress
         print(
             f"Processed {min((i+1)*16, len(files))} out of {len(files)} files Dict len: {len(results_dict)}"
         )
