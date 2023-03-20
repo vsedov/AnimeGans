@@ -1,8 +1,13 @@
+import glob
 import os
 
+import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
+from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans, MiniBatchKMeans
+from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
@@ -124,25 +129,20 @@ def generate_train_loader(
     )
 
 
-import glob
-import os
-
-import numpy as np
-from PIL import Image
-from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.manifold import TSNE
-
-
-def generate_image_cluster_tags(hair_classes=12, eye_classes=11):
+def generate_image_cluster_tags(
+    hair_classes=12, eye_classes=11, max_images=1000, mini_batch=True
+):
     """
     This function generates a visualization of image clusters based on their tags.
     It uses the t-SNE algorithm to reduce the dimensionality of the tag data and
-    the KMeans algorithm to cluster the images based on their tags.
+    either the KMeans or MiniBatchKMeans algorithm to cluster the images based on their tags,
+    depending on the value of the mini_batch parameter.
 
     Args:
         hair_classes (int): The number of hair color classes.
         eye_classes (int): The number of eye color classes.
+        max_images (int): The maximum number of images to include in the visualization.
+        mini_batch (bool): Whether to use MiniBatchKMeans for clustering (True) or KMeans (False).
     """
     # Load the dataset and extract the tag data
     dataset = generate_dataset(hair_classes, eye_classes)
@@ -150,17 +150,20 @@ def generate_image_cluster_tags(hair_classes=12, eye_classes=11):
         [x[1:] for x in dataset.attr_list.values], dtype=np.float32
     )
 
-    # Perform t-SNE dimensionality reduction on the tag data
     tsne = TSNE(n_components=2, perplexity=30, random_state=0)
     tag_embedded = tsne.fit_transform(tag_data)
 
-    # Perform KMeans clustering on the tag data
-    kmeans = KMeans(n_clusters=3)
+    if mini_batch:
+        kmeans = MiniBatchKMeans(n_clusters=3, batch_size=1000)
+    else:
+        kmeans = KMeans(n_clusters=3)
     cluster_labels = kmeans.fit_predict(tag_data)
 
     # Load and standardize the images into a numpy array
     image_folder = "../con/"
     image_files = glob.glob(os.path.join(image_folder, "*.jpg"))
+    if max_images is not None:
+        image_files = image_files[:max_images]
     image_data = []
     for image_file in image_files:
         image = Image.open(image_file)
@@ -184,7 +187,6 @@ def generate_image_cluster_tags(hair_classes=12, eye_classes=11):
     )
     ax.add_artist(legend)
 
-    # Add image thumbnails to the plot
     image_size = 0.05
     for i, (x, y) in enumerate(tag_embedded):
         thumbnail = plt.axes(
