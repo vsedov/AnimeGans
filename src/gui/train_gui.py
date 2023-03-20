@@ -76,6 +76,8 @@ class GeneratorGUI(QWidget):
         self.extra_train_model_type_input = QLineEdit(
             default_options.extra_train_model_type
         )
+        self.lambda_gp_label = QLabel("Gradient Penalty Lambda:")
+        self.lambda_gp_input = QLineEdit(str(default_options.lambda_gp))
 
         self.generate_button = QPushButton("Generate Images")
         self.generate_button.clicked.connect(self.generate_images)
@@ -178,6 +180,7 @@ class GeneratorGUI(QWidget):
             "wandb_name": wandb_name,
             "overwrite": overwrite,
             "extra_train_model_type": extra_train_model_type,
+            "lambda_gp": lambda_gp,
         }
 
         main(args)
