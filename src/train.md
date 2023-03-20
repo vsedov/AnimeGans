@@ -2,9 +2,51 @@
 
 The train.py script is used to train a deep learning model. The script has several command line arguments that can be specified to customize the training process.
 
+## Changing tags
+
+As of the moment I have not been able to implement this within the gui or the
+argparse as this system is very unstable.
+
 ## Command Line Arguments
 
 Here is a list of all the available command line arguments for the train.py script:
+
+```python
+hair = [
+    "orange",
+    "white",  #
+    "aqua",
+    "gray",  #
+    "green",
+    "red",
+    "purple",
+    "pink",  #
+    "blue",
+    "black",
+    "brown",  #
+    "blonde",
+]
+eyes = [
+    "gray",
+    "black",
+    "orange",
+    "pink",
+    "yellow",
+    "aqua",
+    "purple",
+    "green",
+    "brown",
+    "red",
+    "blue",
+]
+```
+
+You can comment out any of the above to see if you can be specific with respect
+to your core generation, but it is advised to keep a note of this somewhere just
+in case. As generating images from this May be a bit hard.
+Reason for implementation : Atm even with the larger dataset. the tag system/labeling
+system is very off, such that I hope to improve it by reducing the labels as
+referenced in the ACGAN Paper.
 
 ```bash
 

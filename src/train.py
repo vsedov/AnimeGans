@@ -46,13 +46,13 @@ DEVICE = torch.device(hc.DEFAULT_DEVICE)
 log = loguru.logger
 
 hair = [
-    "orange",
+    # "orange",
     "white",  #
-    "aqua",
-    "gray",  #
+    # "aqua",
+    # "gray",  #
     "green",
     "red",
-    "purple",
+    # "purple",
     "pink",  #
     "blue",
     "black",
@@ -60,18 +60,19 @@ hair = [
     "blonde",
 ]
 eyes = [
-    "gray",
-    "black",  #
-    "orange",
-    "pink",  #
+    # "gray",
+    # "black",
+    # "orange",
+    "pink",
     "yellow",
-    "aqua",  #
+    "aqua",
     "purple",
     "green",
-    "brown",  #
+    "brown",
     "red",
     "blue",
 ]
+print(len(eyes), len(hair))
 
 
 def parse_args():
@@ -325,6 +326,9 @@ def main(
     iterations = args.iterations
     hair_classes, eye_classes = len(hair), len(eyes)
     num_classes = hair_classes + eye_classes
+    print(hair_classes, eye_classes)
+    print("Num Classes total, ", num_classes)
+
     latent_dim = 128
     smooth = 0.9
 
@@ -367,8 +371,12 @@ def main(
     #  ╭────────────────────────────────────────────────────────────────────╮
     #  │     start Training                                                 │
     #  ╰────────────────────────────────────────────────────────────────────╯
-
-    train_loader = generate_train_loader(batch_size=batch_size)
+    # hair_len=hair_classes, eye_len=eye_classes,
+    train_loader = generate_train_loader(
+        hair_classes=hair_classes,
+        eye_classes=eye_classes,
+        batch_size=batch_size,
+    )
     if args.lambda_gp != 0:
         lambda_gp = args.lambda_gp
 
@@ -398,7 +406,7 @@ def main(
                 batch_size=batch_size,
                 hair_classes=hair_classes,
                 eye_classes=eye_classes,
-                use_numpy=False,
+                use_numpy=True,
             ).to(DEVICE)
 
             fake_img = G(z, fake_tag).to(DEVICE)
