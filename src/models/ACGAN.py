@@ -37,6 +37,7 @@ class Generator(nn.Module):
 
         self.latent_dim = latent_dim
         self.class_dim = class_dim
+        print("Class dim is ", self.class_dim)
 
         self.gen = nn.Sequential(
             nn.ConvTranspose2d(
@@ -128,12 +129,8 @@ class Generator(nn.Module):
         Returns:
             The generated image (torch.Tensor).
         """
-        concat = torch.cat(
-            (noise, _class), dim=1
-        )
-        concat = concat.unsqueeze(2).unsqueeze(
-            3
-        )  
+        concat = torch.cat((noise, _class), dim=1)
+        concat = concat.unsqueeze(2).unsqueeze(3)
         return self.gen(concat)
 
 
@@ -169,6 +166,9 @@ class Discriminator(nn.Module):
 
         self.hair_classes = hair_classes
         self.eye_classes = eye_classes
+        print("Discriminator")
+        print("Hair classes: ", self.hair_classes)
+        print("Eye classes: ", self.eye_classes)
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     G = Generator(latent_dim, class_dim)
     D = Discriminator(12, 10)
 
-    hp.show_sum(G)
+    # hp.show_sum(G)
     hp.show_sum(D)
 
     print((G(z, c)).shape)

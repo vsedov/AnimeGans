@@ -1,6 +1,7 @@
 import loguru
 import numpy as np
 import torch
+from PIL import Image, ImageEnhance
 from torchvision import utils as vutils
 
 log = loguru.logger
@@ -368,3 +369,70 @@ def interpolate(
 
     output = torch.cat(img_list, dim=0)
     vutils.save_image(output, f"{sample_dir}/interpolate.png", nrow=samples)
+
+
+def image_generation(
+    model,
+    device,
+    latent_dim,
+    hair_classes,
+    eye_classes,
+    sample_dir,
+    num_images=2,
+    hair_colors=None,
+    eye_colors=None,
+    image_size=128,
+    saturation_factor=1.0,
+    image_quality=0.9,
+):
+    """
+    Generates multiple image samples with specified attributes.
+
+    Parameters:
+        model (nn.Module): The model to generate images.
+        device (torch.device): The device to run the model on.
+        latent_dim (int): The dimension of the noise vector.
+        hair_classes (int): The number of hair colors.
+        eye_classes (int): The number of eye colors.
+        sample_dir (str): The folder to save images.
+        num_images (int, optional): The number of images to generate. Defaults to 2.
+        hair_colors (List[str], optional): A list of the chosen hair colors. If None, hair colors will be randomly selected.
+        eye_colors (List[str], optional): A list of the chosen eye colors. If None, eye colors will be randomly selected.
+        image_size (int, optional): The size of the generated images. Defaults to 128.
+        saturation_factor (float, optional): The factor to increase or decrease the saturation of the image. Defaults to 1.0.
+        image_quality (float, optional): The quality of the generated image. This should be a value between 0 and 1. Defaults to 0.9.
+
+    Returns:
+        None
+    """
+
+    for image_idx in range(num_images):
+        if hair_colors is None:
+            hair_colors = [np.random.choice(hair_classes) for _ in range(2)]
+
+        if eye_colors is None:
+            eye_colors = [np.random.choice(eye_classes) for _ in range(2)]
+
+        # Generate hair and eye tags
+        hair_tags = [torch.zeros(1, hair_classes).to(device) for _ in range(2)]
+        eye_tags = [torch.zeros(1, eye_classes).to(device) for _ in range(2)]
+
+        for i in range(2):
+            hair_tags[i][0][hair_dict[hair_colors[i]]] = 1
+            eye_tags[i][0][eye_dict[eye_colors[i]]] = 1
+
+        # Concatenate hair and eye tags
+        tags = [torch.cat((hair_tags[i], eye_tags[i]), dim=1) for i in range(2)]
+        z = torch.randn(2, latent_dim).to(device)
+
+        # Generate images
+        for i in range(2):
+            output = model(z[i].unsqueeze(0), tags[i])
+            filename = f"{sample_dir}/{hair_colors[i]}_hair_{eye_colors[i]}_eyes_{i}.png"
+            # Increase saturation
+            img = Image.fromarray(
+                output.cpu().squeeze().numpy().transpose(1, 2, 0)
+            )
+            enhancer = ImageEnhance.Color(img)
+            img = enhancer.enhance(saturation_factor)
+            img.save(filename, quality=int(100 * image_quality), subsampling=0)
