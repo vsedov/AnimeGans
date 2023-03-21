@@ -1,7 +1,7 @@
 import torch
+from torch import nn
 
 from src.core import hp
-
 
 
 class DCGanVariantOneGenerator(nn.Module):
@@ -18,21 +18,34 @@ class DCGanVariantOneGenerator(nn.Module):
     Attributes:
         gen (nn.Sequential): The generator network.
     """
+
     def __init__(
-        self, gpu_count, noise_vector_size, output_channels, feature_maps, extra_layers=None, leaky_relu_slope=0.2
+        self,
+        gpu_count,
+        noise_vector_size,
+        output_channels,
+        feature_maps,
+        extra_layers=None,
+        leaky_relu_slope=0.2,
     ):
         super().__init__()
         self.gpu_count = gpu_count
         self.gen = nn.Sequential(
             nn.BatchNorm2d(feature_maps * 8),
             nn.LeakyReLU(leaky_relu_slope, inplace=True),
-            nn.ConvTranspose2d(feature_maps * 8, feature_maps * 4, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(
+                feature_maps * 8, feature_maps * 4, 4, 2, 1, bias=False
+            ),
             nn.BatchNorm2d(feature_maps * 4),
             nn.LeakyReLU(leaky_relu_slope, inplace=True),
-            nn.ConvTranspose2d(feature_maps * 4, feature_maps * 2, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(
+                feature_maps * 4, feature_maps * 2, 4, 2, 1, bias=False
+            ),
             nn.BatchNorm2d(feature_maps * 2),
             nn.LeakyReLU(leaky_relu_slope, inplace=True),
-            nn.ConvTranspose2d(feature_maps * 2, feature_maps, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(
+                feature_maps * 2, feature_maps, 4, 2, 1, bias=False
+            ),
             nn.BatchNorm2d(feature_maps),
             nn.LeakyReLU(leaky_relu_slope, inplace=True),
         )
@@ -47,12 +60,15 @@ class DCGanVariantOneGenerator(nn.Module):
                     f"extra_layer_{i}_batchnorm", nn.BatchNorm2d(feature_maps)
                 )
                 self.gen.add_module(
-                    f"extra_layer_{i}_relu", nn.LeakyReLU(leaky_relu_slope, inplace=True)
+                    f"extra_layer_{i}_relu",
+                    nn.LeakyReLU(leaky_relu_slope, inplace=True),
                 )
 
         self.gen.add_module(
             "final_layer_deconv",
-            nn.ConvTranspose2d(feature_maps, output_channels, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(
+                feature_maps, output_channels, 4, 2, 1, bias=False
+            ),
         )
         self.gen.add_module("final_layer_tanh", nn.Tanh())
 
@@ -66,9 +82,13 @@ class DCGanVariantOneGenerator(nn.Module):
             torch.Tensor: The generated image.
         """
         gpu_ids = None
-        if isinstance(input.data, torch.cuda.FloatTensor) and self.gpu_count > 1:
+        if (
+            isinstance(input.data, torch.cuda.FloatTensor)
+            and self.gpu_count > 1
+        ):
             gpu_ids = range(self.gpu_count)
         return nn.parallel.data_parallel(self.gen, input, gpu_ids)
+
 
 class DCGanVariantOneDiscriminator(nn.Module):
     """Discriminator for the DCGAN variant one architecture.
@@ -83,8 +103,14 @@ class DCGanVariantOneDiscriminator(nn.Module):
     Attributes:
         disc (nn.Sequential): The discriminator network.
     """
+
     def __init__(
-        self, gpu_count, input_channels, feature_maps, extra_layers, leaky_relu_slope=0.2
+        self,
+        gpu_count,
+        input_channels,
+        feature_maps,
+        extra_layers,
+        leaky_relu_slope=0.2,
     ):
         super().__init__()
         self.gpu_count = gpu_count
@@ -102,7 +128,9 @@ class DCGanVariantOneDiscriminator(nn.Module):
         for i in range(extra_layers):
             self.disc.add_module(
                 f"extra_layers_{i}_{feature_maps * 4}_conv",
-                nn.Conv2d(feature_maps * 4, feature_maps * 4, 3, 1, 1, bias=False),
+                nn.Conv2d(
+                    feature_maps * 4, feature_maps * 4, 3, 1, 1, bias=False
+                ),
             )
             self.disc.add_module(
                 f"extra_layers_{i}_{feature_maps * 4}_batchnorm",
@@ -114,7 +142,8 @@ class DCGanVariantOneDiscriminator(nn.Module):
             )
 
         self.disc.add_module(
-            "final_layer_conv", nn.Conv2d(feature_maps * 4, 1, 4, 1, 0, bias=False)
+            "final_layer_conv",
+            nn.Conv2d(feature_maps * 4, 1, 4, 1, 0, bias=False),
         )
         self.disc.add_module("final_layer_sigmoid", nn.Sigmoid())
 
@@ -134,9 +163,14 @@ class DCGanVariantOneDiscriminator(nn.Module):
         return output.view(-1, 1)
 
 
-
 def evaluation():
-    print("Generator With Extra Layers\n")
+    print(f"nz = {hp.get_core('nz')}")
+    print(f"nc = {hp.get_core('nc')}")
+    print(f"ngf = {hp.get_core('ngf')}")
+    print(f"extra_layers_g = {hp.get_core('extra_layers_g')}")
+    print(f"extra_layers_d = {hp.get_core('extra_layers_d')}")
+    print(f"ndf = {hp.get_core('ndf')}")
+
     hp.show_sum(
         DCGanVariantOneGenerator(
             1,
@@ -148,13 +182,7 @@ def evaluation():
     )
 
     hp.show_sum(
-        DCGanVariantTwoDiscriminator(
-            1,
-            hp.get_core("nz"),
-            hp.get_core("nc"),
-            hp.get_core("ngf"),
-        )
-    )        DCGanVariantOneDiscriminator(
+        DCGanVariantOneDiscriminator(
             1,
             hp.get_core("nz"),
             hp.get_core("nc"),

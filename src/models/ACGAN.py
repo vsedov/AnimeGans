@@ -291,11 +291,10 @@ if __name__ == "__main__":
     batch_size = 2
     z = torch.randn(batch_size, latent_dim)
     c = torch.randn(batch_size, class_dim)
-
     G = Generator(latent_dim, class_dim)
     D = Discriminator(12, 10)
 
-    # hp.show_sum(G)
+    hp.show_sum(G)
     hp.show_sum(D)
 
     print((G(z, c)).shape)
