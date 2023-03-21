@@ -72,6 +72,7 @@ eyes = [
     "red",
     "blue",
 ]
+
 print(len(eyes), len(hair))
 
 

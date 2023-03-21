@@ -7,19 +7,35 @@ from torchvision import utils as vutils
 log = loguru.logger
 """Hair and eye color mappings and dictionaries."""
 hair_mapping = [
-    "orange",
+    # "orange",
     "white",
-    "aqua",
-    "gray",
+    # "aqua",
+    # "gray",
     "green",
     "red",
-    "purple",
+    # "purple",
     "pink",
     "blue",
     "black",
     "brown",
     "blonde",
 ]
+"""Eye color mapping."""
+eye_mapping = [
+    # "gray",
+    # "black",
+    # "orange",
+    "pink",
+    "yellow",
+    "aqua",
+    "purple",
+    "green",
+    "brown",
+    "red",
+    "blue",
+]
+
+
 """Hair color mapping."""
 hair_dict = {
     "orange": 0,
@@ -37,20 +53,6 @@ hair_dict = {
 }
 
 """Eye color mapping."""
-eye_mapping = [
-    "gray",
-    "black",
-    "orange",
-    "pink",
-    "yellow",
-    "aqua",
-    "purple",
-    "green",
-    "brown",
-    "red",
-    "blue",
-]
-"""Eye color mapping."""
 eye_dict = {
     "gray": 0,
     "black": 1,
@@ -64,6 +66,14 @@ eye_dict = {
     "red": 9,
     "blue": 10,
 }
+
+
+hair_dict = {color: index for index, color in enumerate(hair_mapping)}
+eye_dict = {color: index for index, color in enumerate(eye_mapping)}
+
+# Remove commented colors from hair_dict and eye_dict
+hair_dict = {k: v for k, v in hair_dict.items() if k is not None}
+eye_dict = {k: v for k, v in eye_dict.items() if k is not None}
 
 
 def save_model(model, optimizer, step, file_path):
@@ -189,8 +199,18 @@ def generate_by_attributes(
         None
     """
     # Choose hair and eye class
-    hair_class = hair_dict.get(hair_color, np.random.choice(hair_classes))
-    eye_class = eye_dict.get(eye_color, np.random.choice(eye_classes))
+    hair_class = hair_mapping.index(hair_color)
+    eye_class = eye_mapping.index(eye_color)
+    print("Hair eye CLS: ", hair_class, eye_class)
+    print(hair_color, eye_color)
+    hair_class = hair_dict.get(hair_color, np.random.randint(hair_classes))
+    eye_class = eye_dict.get(eye_color, np.random.randint(eye_classes))
+
+    # Get the index from hair_mapping and eye_mapping
+    # print(hair_class)
+
+    print("Hair eye CLS: ", hair_class, eye_class)
+    # gives 4 and 6, which is correct
 
     # Generate hair and eye tags
     hair_tag = torch.zeros(64, hair_classes).to(device)
@@ -207,6 +227,7 @@ def generate_by_attributes(
     output = model(z, tag)
     filename = f"{sample_dir}/{hair_mapping[hair_class]} hair {eye_mapping[eye_class]} eyes.png"
     vutils.save_image(output, filename)
+    return filename
 
 
 def hair_grad(model, device, latent_dim, hair_classes, eye_classes, sample_dir):
@@ -383,56 +404,39 @@ def image_generation(
     eye_colors=None,
     image_size=128,
     saturation_factor=1.0,
-    image_quality=0.9,
 ):
-    """
-    Generates multiple image samples with specified attributes.
+    """Generate high-quality images based on the given parameters.
 
-    Parameters:
-        model (nn.Module): The model to generate images.
-        device (torch.device): The device to run the model on.
-        latent_dim (int): The dimension of the noise vector.
-        hair_classes (int): The number of hair colors.
-        eye_classes (int): The number of eye colors.
-        sample_dir (str): The folder to save images.
-        num_images (int, optional): The number of images to generate. Defaults to 2.
-        hair_colors (List[str], optional): A list of the chosen hair colors. If None, hair colors will be randomly selected.
-        eye_colors (List[str], optional): A list of the chosen eye colors. If None, eye colors will be randomly selected.
-        image_size (int, optional): The size of the generated images. Defaults to 128.
-        saturation_factor (float, optional): The factor to increase or decrease the saturation of the image. Defaults to 1.0.
-        image_quality (float, optional): The quality of the generated image. This should be a value between 0 and 1. Defaults to 0.9.
-
+    Args:
+        model (nn.Module): model to generate images.
+        device (torch.device): device to run model on.
+        latent_dim (int): dimension of the noise vector.
+        sample_dir (str): folder to save images.
+        num_images (int, optional): number of image samples to generate. Defaults to 2.
+        hair_colors (list, optional): list of hair colors to generate. Defaults to None.
+        eye_colors (list, optional): list of eye colors to generate. Defaults to None.
+        image_size (int, optional): the size of the generated image. Defaults to 128.
+        saturation_factor (float, optional): saturation factor for enhancing the image. Defaults to 1.0.
     Returns:
         None
     """
+    for i in range(num_images):
+        image_path = generate_by_attributes(
+            model,
+            device,
+            latent_dim,
+            hair_classes,
+            eye_classes,
+            sample_dir,
+            hair_color=hair_colors,
+            eye_color=eye_colors,
+        )
 
-    for image_idx in range(num_images):
-        if hair_colors is None:
-            hair_colors = [np.random.choice(hair_classes) for _ in range(2)]
+        image = Image.open(image_path)
 
-        if eye_colors is None:
-            eye_colors = [np.random.choice(eye_classes) for _ in range(2)]
+        # Enhance saturation
+        if saturation_factor != 1.0:
+            enhancer = ImageEnhance.Color(image)
+            image = enhancer.enhance(saturation_factor)
 
-        # Generate hair and eye tags
-        hair_tags = [torch.zeros(1, hair_classes).to(device) for _ in range(2)]
-        eye_tags = [torch.zeros(1, eye_classes).to(device) for _ in range(2)]
-
-        for i in range(2):
-            hair_tags[i][0][hair_dict[hair_colors[i]]] = 1
-            eye_tags[i][0][eye_dict[eye_colors[i]]] = 1
-
-        # Concatenate hair and eye tags
-        tags = [torch.cat((hair_tags[i], eye_tags[i]), dim=1) for i in range(2)]
-        z = torch.randn(2, latent_dim).to(device)
-
-        # Generate images
-        for i in range(2):
-            output = model(z[i].unsqueeze(0), tags[i])
-            filename = f"{sample_dir}/{hair_colors[i]}_hair_{eye_colors[i]}_eyes_{i}.png"
-            # Increase saturation
-            img = Image.fromarray(
-                output.cpu().squeeze().numpy().transpose(1, 2, 0)
-            )
-            enhancer = ImageEnhance.Color(img)
-            img = enhancer.enhance(saturation_factor)
-            img.save(filename, quality=int(100 * image_quality), subsampling=0)
+        image.save(image_path)

@@ -1,6 +1,5 @@
 import os
 from argparse import ArgumentParser
-from collections import namedtuple
 
 import torch
 
@@ -67,7 +66,6 @@ def generate_images(
             args.eye,
             args.image_size,
             args.saturation,
-            args.qual,
         ),
     }
 
@@ -116,7 +114,7 @@ def parse_args():
         "-b",
         "--batch_size",
         help="Batch size used during training (Why) : Because you May retrain your dataset on a previous model, if you do something where you train on epoch 100, and then you retrain on that data on epoch 200, in this instance you would have to refer to  its respected batch",
-        default=64,
+        default=128,
         type=int,
     )
     parser.add_argument(
@@ -150,13 +148,13 @@ def parse_args():
     parser.add_argument(
         "--num_images",
         help="Number of images to generate.",
-        default=2,
+        default=1,
         type=int,
     )
     parser.add_argument(
         "--image_size",
         help="Size of the generated images.",
-        default=128,
+        default=64,
         type=int,
     )
     parser.add_argument(
@@ -165,40 +163,13 @@ def parse_args():
         default=0.9,
         type=float,
     )
-    parser.add_argument(
-        "--qual",
-        help="qual of the generated images.",
-        default=0.9,
-        type=float,
-    )
-
-    Args = namedtuple(
-        "Args",
-        [
-            "type",
-            "hair",
-            "eye",
-            "sample_dir",
-            "batch_size",
-            "epoch",
-            "check_point_number",
-            "extra_generator_layers",
-            "range",
-            "num_images",
-            "image_size",
-            "saturation",
-            "qual",
-            "gen_model_dir",
-        ],
-    )
-
     args = parser.parse_args()
     if args.check_point_number == "best":
         args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_best_.ckpt"
     else:
         args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_{args.check_point_number}.ckpt"
 
-    return Args(*args.__dict__.values())
+    return args
 
 
 def main(args):
@@ -254,6 +225,7 @@ def main(args):
             )
     else:
 
+        print(args.gen_model_dir)
         prev_state = torch.load(args.gen_model_dir)
         G.load_state_dict(prev_state["model"])
         G = G.eval()

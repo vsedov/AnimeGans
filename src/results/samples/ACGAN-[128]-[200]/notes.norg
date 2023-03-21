@@ -1,0 +1,14 @@
+
+* Collapse does occur but under certain tags
+
+  - After core evaluation : the green tags, have evaluated to be the course source for the mode collapse and other major issues.
+  - Tests will have to be run and debuged to see why this ococurs so abruptly.
+  - Expansion on the network / changes to the current model or more May be
+    required. Perhaps there May be something with how training is done throughout the project scope. 
+
+* Parameters
+  - Extra Generator was used here
+  - Train under 200 epochs, and the best epoch is 60 learning rate May be
+    dynamic enough to be viable / change 
+
+
