@@ -80,10 +80,6 @@ class AnimeGenerationWindow(QWidget):
         self.saturation_input = QLineEdit()
         self.saturation_input.setText("0.9")
 
-        qual_label = QLabel("Qual:")
-        self.qual_input = QLineEdit()
-        self.qual_input.setText("0.9")
-
         generate_button = QPushButton("Generate Images")
         generate_button.clicked.connect(self.generate_images)
 
@@ -168,26 +164,9 @@ class AnimeGenerationWindow(QWidget):
                 "num_images",
                 "image_size",
                 "saturation",
-                "qual",
                 "gen_model_dir",
             ],
         )
-        args = args(
-            type,
-            hair,
-            eye,
-            sample_dir,
-            batch_size,
-            epoch,
-            check_point_number,
-            extra_generator_layers,
-            range,
-            num_images,
-            image_size,
-            saturation,
-            qual,
-        )
-
         args = parser.parse_args()
         if args.check_point_number == "best":
             args.gen_model_dir = f"{hc.DIR}results/checkpoints/ACGAN-[{args.batch_size}]-[{args.epoch}]/G_best_.ckpt"
