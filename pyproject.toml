@@ -50,6 +50,8 @@ imageio-ffmpeg = "^0.4.8"
 moviepy = "^1.0.3"
 torch-directml = "^0.1.13.1.dev230301"
 scikit-learn = "^1.2.2"
+llvmlite = "^0.39.1"
+umap-learn = "^0.5.3"
 
 
 [tool.poetry.dev-dependencies]
