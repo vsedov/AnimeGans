@@ -420,7 +420,7 @@ def image_generation(
     Returns:
         None
     """
-    for i in range(num_images):
+    for _ in range(num_images):
         image_path = generate_by_attributes(
             model,
             device,

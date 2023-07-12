@@ -31,7 +31,7 @@ tags = [
 ]
 
 imgs = glob.glob("../con/*.jpg")
-imgs_nums = set(re.findall(r"\d+", img)[-1] for img in imgs)
+imgs_nums = {re.findall(r"\d+", img)[-1] for img in imgs}
 
 with open("con.pickle", "rb") as handle:
     d = pickle.load(handle)
@@ -41,7 +41,7 @@ with open("con.csv", "a") as csvfile:
     writer.writeheader()
 
     for k, v in d.items():
-        if not k in imgs_nums:
+        if k not in imgs_nums:
             continue
 
         label = {k2: 0 for k2 in tags}

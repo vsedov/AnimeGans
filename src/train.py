@@ -188,8 +188,7 @@ def save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch, is_best=False):
         optimizer=G_optim,
         step=epoch,
         file_path=os.path.join(
-            checkpoint_dir,
-            "G_{}{}.ckpt".format("best_" if is_best else "", suffix),
+            checkpoint_dir, f'G_{"best_" if is_best else ""}{suffix}.ckpt'
         ),
     )
     save_model(
@@ -197,8 +196,7 @@ def save_both(G, D, G_optim, D_optim, checkpoint_dir, epoch, is_best=False):
         optimizer=D_optim,
         step=epoch,
         file_path=os.path.join(
-            checkpoint_dir,
-            "D_{}{}.ckpt".format("best_" if is_best else "", suffix),
+            checkpoint_dir, f'D_{"best_" if is_best else ""}{suffix}.ckpt'
         ),
     )
 
@@ -248,8 +246,6 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
             os.path.join(checkpoint_dir, "D_best_model.ckpt"),
         )
 
-    # elif args.extra_train_model_type == "number":
-    # Check if it_containsnumber
     elif (x := args.extra_train_model_type) is not None and x.startswith(
         "number"
     ):
@@ -270,28 +266,20 @@ def load_checkpoint(args, checkpoint_dir, G, G_optim, D, D_optim):
 
             if max_n != -1:
                 G, G_optim, start_step = load_model(
-                    G,
-                    G_optim,
-                    os.path.join(checkpoint_dir, "G_{}.ckpt".format(max_n)),
+                    G, G_optim, os.path.join(checkpoint_dir, f"G_{max_n}.ckpt")
                 )
                 D, D_optim, start_step = load_model(
-                    D,
-                    D_optim,
-                    os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n)),
+                    D, D_optim, os.path.join(checkpoint_dir, f"D_{max_n}.ckpt")
                 )
 
                 print("Epoch start: ", start_step)
         else:
             max_n = splited_data[-1]
             G, G_optim, start_step = load_model(
-                G,
-                G_optim,
-                os.path.join(checkpoint_dir, "G_{}.ckpt".format(max_n)),
+                G, G_optim, os.path.join(checkpoint_dir, f"G_{max_n}.ckpt")
             )
             D, D_optim, start_step = load_model(
-                D,
-                D_optim,
-                os.path.join(checkpoint_dir, "D_{}.ckpt".format(max_n)),
+                D, D_optim, os.path.join(checkpoint_dir, f"D_{max_n}.ckpt")
             )
         print(splited_data)
 
@@ -309,17 +297,14 @@ def main(
     # smooth = 0.9
     if args.wandb == "true":
         wandb.init(project=args.wandb_project, name=args.wandb_name)
-        config = vars(args)
-        config.update(
-            {
-                "len_hair_classes": len(hair),
-                "len_eye_classes": len(eyes),
-                "hair_classes": hair,
-                "eye_classes": eyes,
-                "smooth": 0.9,
-                "latent_dim": 128,
-            }
-        )
+        config = vars(args) | {
+            "len_hair_classes": len(hair),
+            "len_eye_classes": len(eyes),
+            "hair_classes": hair,
+            "eye_classes": eyes,
+            "smooth": 0.9,
+            "latent_dim": 128,
+        }
         wandb.config.update(config)
 
     # Define configuration
@@ -335,9 +320,9 @@ def main(
 
     if args.overwrite:
         x, y = args.overwrite.split(":")
-        config = "ACGAN-[{}]-[{}]".format(x, y)
+        config = f"ACGAN-[{x}]-[{y}]"
     else:
-        config = "ACGAN-[{}]-[{}]".format(batch_size, iterations)
+        config = f"ACGAN-[{batch_size}]-[{iterations}]"
 
     # Create directories
     random_sample_dir = os.path.join(
@@ -516,8 +501,7 @@ def main(
                 vutils.save_image(
                     fake_img.data.view(batch_size, 3, 64, 64),
                     os.path.join(
-                        random_sample_dir,
-                        "fake_step_{}_{}.png".format(epoch, step_i),
+                        random_sample_dir, f"fake_step_{epoch}_{step_i}.png"
                     ),
                 )
 

@@ -31,7 +31,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 save_path = (
-    args.save_path + ".mp4" if args.format == "mp4" else args.save_path + ".gif"
+    f"{args.save_path}.mp4"
+    if args.format == "mp4"
+    else f"{args.save_path}.gif"
 )
 
 # Define a function to create an image file from the 8x8 grid images
@@ -59,7 +61,7 @@ def create_grid(img_path, output_dir):
     # Save the grid image to a file
     output_path = os.path.join(
         output_dir,
-        "merged_{}.png".format(os.path.splitext(os.path.basename(img_path))[0]),
+        f"merged_{os.path.splitext(os.path.basename(img_path))[0]}.png",
     )
     grid_img.save(output_path)
 

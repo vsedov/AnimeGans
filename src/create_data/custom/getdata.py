@@ -53,7 +53,7 @@ class DSDownloader:
             True if it does , else False
 
         """
-        return True if str(os.path.exists(filename)) else False
+        return bool(str(os.path.exists(filename)))
 
     def check_zip(self):
         """
@@ -73,7 +73,7 @@ class DSDownloader:
         Boolean
             if the folder exists return True else False
         """
-        return True if os.path.isdir(folder) and os.listdir(folder) else False
+        return bool(os.path.isdir(folder) and os.listdir(folder))
 
     def force_replace_zip(self):
         """

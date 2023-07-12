@@ -194,5 +194,3 @@ def evaluation():
 
 if __name__ == "__main__":
     exit(evaluation())
-else:
-    pass

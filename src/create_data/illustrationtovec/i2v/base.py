@@ -14,10 +14,7 @@ class Illustration2VecBase(object):
         else:
             self.tags = None
 
-        if threshold is not None:
-            self.threshold = threshold
-        else:
-            self.threshold = None
+        self.threshold = threshold if threshold is not None else None
 
     @abstractmethod
     def _extract(self, inputs, layername):
@@ -58,23 +55,35 @@ class Illustration2VecBase(object):
         character_arg = np.argsort(-character_prob, axis=1)[:, :n_tag]
         copyright_arg = np.argsort(-copyright_prob, axis=1)[:, :n_tag]
         rating_arg = np.argsort(-rating_prob, axis=1)
-        result = []
-        for i in range(prob.shape[0]):
-            result.append({
-                'general': list(zip(
-                    self.tags[general_arg[i]],
-                    general_prob[i, general_arg[i]].tolist())),
-                'character': list(zip(
-                    self.tags[512 + character_arg[i]],
-                    character_prob[i, character_arg[i]].tolist())),
-                'copyright': list(zip(
-                    self.tags[1024 + copyright_arg[i]],
-                    copyright_prob[i, copyright_arg[i]].tolist())),
-                'rating': list(zip(
-                    self.tags[1536 + rating_arg[i]],
-                    rating_prob[i, rating_arg[i]].tolist())),
-            })
-        return result
+        return [
+            {
+                'general': list(
+                    zip(
+                        self.tags[general_arg[i]],
+                        general_prob[i, general_arg[i]].tolist(),
+                    )
+                ),
+                'character': list(
+                    zip(
+                        self.tags[512 + character_arg[i]],
+                        character_prob[i, character_arg[i]].tolist(),
+                    )
+                ),
+                'copyright': list(
+                    zip(
+                        self.tags[1024 + copyright_arg[i]],
+                        copyright_prob[i, copyright_arg[i]].tolist(),
+                    )
+                ),
+                'rating': list(
+                    zip(
+                        self.tags[1536 + rating_arg[i]],
+                        rating_prob[i, rating_arg[i]].tolist(),
+                    )
+                ),
+            }
+            for i in range(prob.shape[0])
+        ]
 
     def __extract_plausible_tags(self, preds, f):
         result = []
@@ -93,7 +102,6 @@ class Illustration2VecBase(object):
     def estimate_plausible_tags(
             self, images, threshold=0.25, threshold_rule='constant'):
         preds = self.estimate_top_tags(images, n_tag=512)
-        result = []
         if threshold_rule == 'constant':
             return self.__extract_plausible_tags(
                 preds, lambda t, p: p > threshold)
@@ -117,7 +125,7 @@ class Illustration2VecBase(object):
                 preds, lambda t, p: p > self.threshold[self.index[t], 2])
         else:
             raise TypeError('unknown rule specified')
-        return result
+        return []
 
     def extract_feature(self, images):
         imgs = [self._convert_image(img) for img in images]

@@ -19,7 +19,7 @@ class ChainerI2V(Illustration2VecBase):
 
     def resize_image(self, im, new_dims, interp_order=1):
         # NOTE: we import the following codes from caffe.io.resize_image()
-        if im.shape[-1] == 1 or im.shape[-1] == 3:
+        if im.shape[-1] in [1, 3]:
             im_min, im_max = im.min(), im.max()
             if im_max > im_min:
                 # skimage is fast but only understands {1,3} channel images
@@ -57,14 +57,13 @@ class ChainerI2V(Illustration2VecBase):
             h = self._forward(inputs, layername='conv6_4')
             h = average_pooling_2d(h, ksize=7)
             y = sigmoid(h)
-            return y.data
         elif layername == 'encode1neuron':
             h = self._forward(inputs, layername='encode1')
             y = sigmoid(h)
-            return y.data
         else:
             y = self._forward(inputs, layername)
-            return y.data
+
+        return y.data
 
 def make_i2v_with_chainer(param_path, tag_path=None, threshold_path=None):
     # ignore UserWarnings from chainer

@@ -12,7 +12,7 @@ def main():
     tar_file = "data.tgz"
     if not os.path.isfile(tar_file):
         return FileNotFoundError(
-            "File not found: {} Please Download this file".format(tar_file)
+            f"File not found: {tar_file} Please Download this file"
         )
 
     tar = open_tar_file(tar_file)

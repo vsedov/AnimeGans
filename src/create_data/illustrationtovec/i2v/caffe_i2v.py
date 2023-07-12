@@ -27,10 +27,10 @@ class CaffeI2V(Illustration2VecBase):
             np.array(input_.shape)[[0, 3, 1, 2]], dtype=np.float32)
         for ix, in_ in enumerate(input_):
             caffe_in[ix] = \
-                self.net.transformer.preprocess(self.net.inputs[0], in_)
-        out = self.net.forward_all(
-            blobs=[layername], **{self.net.inputs[0]: caffe_in})[layername]
-        return out
+                    self.net.transformer.preprocess(self.net.inputs[0], in_)
+        return self.net.forward_all(
+            blobs=[layername], **{self.net.inputs[0]: caffe_in}
+        )[layername]
 
 
 def make_i2v_with_caffe(net_path, param_path, tag_path=None, threshold_path=None):

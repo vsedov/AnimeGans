@@ -24,10 +24,10 @@ class DSBuilder:
     """
 
     def construct_face_dataset(self):
-        dirs = [f for f in os.listdir(self.danbooru_path)]
+        dirs = list(os.listdir(self.danbooru_path))
         imgs = []
-        for i in range(len(dirs)):
-            sub_dir = os.path.join(self.danbooru_path, dirs[i])
+        for dir_ in dirs:
+            sub_dir = os.path.join(self.danbooru_path, dir_)
             imgs = imgs + (
                 [
                     os.path.join(sub_dir, f)
@@ -61,12 +61,10 @@ class DSBuilder:
 
         im = Image.open(img_path)
         faces = animeface.detect(im)
-        prob_list = []
         len_f = len(faces)
         if len_f == 0:
             return 0
-        for i in range(len_f):
-            prob_list.append(faces[i].likelihood)
+        prob_list = [faces[i].likelihood for i in range(len_f)]
         prob_array = np.array(prob_list)
         idx = np.argmax(prob_array)
         face_pos = faces[idx].face.pos

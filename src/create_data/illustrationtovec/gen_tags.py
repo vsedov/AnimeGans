@@ -69,7 +69,7 @@ def process_file(file):
     if len(n_matches) == 1:
         n = n_matches[0]
     elif len(n_matches) == 2:
-        n = n_matches[0] + "_" + n_matches[1]
+        n = f"{n_matches[0]}_{n_matches[1]}"
 
     print(f"{n} - {file}")
 
@@ -119,7 +119,7 @@ print(file_chunks)
 results_dict = {}
 with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
     for i, result in enumerate(executor.map(thread_function, file_chunks)):
-        results_dict.update(result)
+        results_dict |= result
 
         print(
             f"Processed {min((i+1)*16, len(files))} out of {len(files)} files Dict len: {len(results_dict)}"

@@ -47,7 +47,7 @@ class AttrDataset(Dataset):
 
     def __getitem__(self, idx):
         img_name = os.path.join(
-            self.root_dir, str(self.attr_list.iloc[idx, 0]) + ".jpg"
+            self.root_dir, f"{str(self.attr_list.iloc[idx, 0])}.jpg"
         )
 
         image = Image.open(img_name).convert("RGB")
@@ -61,10 +61,8 @@ class AttrDataset(Dataset):
             image = self.transform(image)
         return (
             image,
-            torch.FloatTensor(attrs[0 : self.hair_class]),  # hair_cls = 8
-            torch.FloatTensor(
-                attrs[24 - (self.eye_class + 1) :]
-            ),  # eye_cls = 8 but because we have 12 total, we do 12 + (12 - 8) -1
+            torch.FloatTensor(attrs[: self.hair_class]),
+            torch.FloatTensor(attrs[24 - (self.eye_class + 1) :]),
         )
 
 
@@ -157,8 +155,7 @@ def generate_image_cluster_tags(
     image_folder = "../con"
     image_files = glob.glob(os.path.join(image_folder, "*.jpg"))
     if max_images is not None:
-        if max_images > len(image_files):
-            max_images = len(image_files)
+        max_images = min(max_images, len(image_files))
         image_files = image_files[:max_images]
 
     # Create a figure to hold the plot
@@ -210,7 +207,7 @@ def generate_image_cluster_tags(
 
 def validate_data_loader(train_loader):
 
-    for step, (real, hair, eye) in enumerate(train_loader):
+    for real, hair, eye in train_loader:
         print(hair.shape)
         print(eye.shape)
 
@@ -252,10 +249,3 @@ def visualize_umap(image_directory, resize_shape):
 
 
 # Function to create UMAP visualization
-if __name__ == "__main__":
-    # generate_image_cluster_tags()
-    # Example usage
-    # image_directory = "../con/"
-    # resize_shape = (32, 32)
-    # visualize_umap(image_directory, resize_shape)
-    pass
